@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
 type Message struct {
@@ -23,7 +21,6 @@ func main() {
 		fmt.Println(current_time)
 	})
 
-	cristmas_holiday := holiday.NewNextHoliday("Christmas", "31/12/2023", false, 200)
-	fmt.Println(cristmas_holiday.Print())
+	fmt.Printf("listening on %s\n", PORT)
 	http.ListenAndServe(":"+PORT, nil)
 }
