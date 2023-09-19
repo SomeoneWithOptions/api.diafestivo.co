@@ -24,9 +24,13 @@ func main() {
 	}
 
 	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
-		result := database.GetAllHolidaysAsJSON(REDIS_DB)
+		result, err  := database.GetAllHolidaysAsJSON(REDIS_DB)
+		if err != nil {
+			panic (err)
+		}
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(result))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(*result))
 		time_iso := time.Now().Format(time.RFC3339)
 		fmt.Printf("the URL \"%v\"  was requested at %v", r.URL, time_iso)
 	})
