@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,11 +9,6 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/joho/godotenv"
 )
-
-
-type Message struct {
-	Text string `json:"message"`
-}
 
 func main() {
 
@@ -29,14 +23,12 @@ func main() {
 		PORT = "3002"
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		message := Message{Text: "hello"}
+	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
+		result := database.GetAllHolidaysAsJSON(REDIS_DB)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(message)
+		w.Write([]byte(result))
 		time_iso := time.Now().Format(time.RFC3339)
-		result := database.GetHolidays(REDIS_DB)
-		fmt.Println(time_iso)
-		fmt.Println(result)
+		fmt.Printf("the URL \"%v\"  was requested at %v", r.URL, time_iso)
 	})
 
 	fmt.Printf("listening on %s\n", PORT)
