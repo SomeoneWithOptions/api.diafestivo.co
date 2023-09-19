@@ -7,8 +7,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/joho/godotenv"
 )
+
 
 type Message struct {
 	Text string `json:"message"`
@@ -21,6 +23,8 @@ func main() {
 	}
 
 	PORT := os.Getenv("PORT")
+	REDIS_DB := os.Getenv("REDIS_DB")
+
 	if PORT == "" {
 		PORT = "3002"
 	}
@@ -29,8 +33,10 @@ func main() {
 		message := Message{Text: "hello"}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(message)
-		time_iso := time.Now().Format("2006-01-02")
+		time_iso := time.Now().Format(time.RFC3339)
+		result := database.GetHolidays(REDIS_DB)
 		fmt.Println(time_iso)
+		fmt.Println(result)
 	})
 
 	fmt.Printf("listening on %s\n", PORT)
