@@ -13,7 +13,7 @@ import (
 func main() {
 
 	if err := godotenv.Load(); err != nil {
-		fmt.Printf("Error loading .env file: %v", err)
+		fmt.Printf("error loading .env file: %v\n", err)
 	}
 
 	PORT := os.Getenv("PORT")
@@ -32,7 +32,7 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(*result))
 		time_iso := time.Now().Format(time.RFC3339)
-		fmt.Printf("the URL \"%v\"  was requested at %v", r.URL, time_iso)
+		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
 	})
 
 	fmt.Printf("listening on %s\n", PORT)
