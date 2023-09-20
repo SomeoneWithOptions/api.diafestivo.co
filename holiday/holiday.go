@@ -1,6 +1,10 @@
 package holiday
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+	"time"
+)
 
 type NextHoliday struct {
 	Holiday   Holiday
@@ -24,4 +28,13 @@ func NewNextHoliday(name string, date string, is_today bool, days_until int32) N
 
 func (n NextHoliday) Print() string {
 	return fmt.Sprintf("name: %s\ndate: %s\nisToday: %v\ndaysUntil: %d", n.Holiday.Name, n.Holiday.Date, n.IsToday, n.DaysUntil)
+}
+
+
+func SortHolidaysArray(holidays []Holiday) {
+	sort.SliceStable(holidays, func(i, j int) bool {
+		dateI, _ := time.Parse(time.RFC3339, holidays[i].Date)
+		dateJ, _ := time.Parse(time.RFC3339, holidays[j].Date)
+		return dateI.Before(dateJ)
+	})
 }

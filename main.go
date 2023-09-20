@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
+	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 	"github.com/joho/godotenv"
 )
 
@@ -23,6 +24,7 @@ func main() {
 		PORT = "3002"
 	}
 
+	
 	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
 		result, err  := database.GetAllHolidaysAsJSON(REDIS_DB)
 		if err != nil {
@@ -33,6 +35,25 @@ func main() {
 		w.Write([]byte(*result))
 		time_iso := time.Now().Format(time.RFC3339)
 		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
+	})
+	
+	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
+		result, err  :=  database.GetAllHolidays(REDIS_DB)
+		if err != nil {
+			panic (err)
+		}
+
+		holiday.SortHolidaysArray(*result)
+		fmt.Println(result)
+		// w.Header().Set("Content-Type", "application/json")
+		time_iso := time.Now().Format(time.RFC3339)
+		message := fmt.Sprintf("Hellos World at %v", time_iso)
+
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(message))
+		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
+	
 	})
 
 	fmt.Printf("listening on %s\n", PORT)
