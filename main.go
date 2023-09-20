@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
+	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 	"github.com/joho/godotenv"
 )
@@ -38,7 +39,6 @@ func main() {
 	})
 
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
-		// fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time.Now().Format(time.RFC3339))
 		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -46,15 +46,21 @@ func main() {
 
 		holiday.SortHolidaysArray(*all_holidays)
 		next_holiday := holiday.FindNextHoliday(*all_holidays)
-		n := holiday.NewNextHoliday(next_holiday.Name,next_holiday.Date,next_holiday.IsToday(),int32(next_holiday.DaysUntil()))
-		message, _  := json.Marshal(n)
-		
+		n := holiday.NewNextHoliday(next_holiday.Name, next_holiday.Date, next_holiday.IsToday(), int32(next_holiday.DaysUntil()))
+		message, _ := json.Marshal(n)
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(message))
 
 	})
 
-	fmt.Printf("listening on %s\n", PORT)
+	http.HandleFunc("/gif", HandleGifRoute)
+
 	http.ListenAndServe(":"+PORT, nil)
+}
+
+func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
+	gif_url := giphy.GetGifURL()
+	w.Write([]byte(gif_url))
 }
