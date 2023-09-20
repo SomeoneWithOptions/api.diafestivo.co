@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func main() {
 	})
 
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time.Now().Format(time.RFC3339))
+		// fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time.Now().Format(time.RFC3339))
 		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -45,10 +46,10 @@ func main() {
 
 		holiday.SortHolidaysArray(*all_holidays)
 		next_holiday := holiday.FindNextHoliday(*all_holidays)
-		fmt.Println(next_holiday)
-		// w.Header().Set("Content-Type", "application/json")
-		message := fmt.Sprintf("el Siguiente Festivo es %v %v", next_holiday.Name, next_holiday.Date)
-
+		n := holiday.NewNextHoliday(next_holiday.Name,next_holiday.Date,next_holiday.IsToday(),int32(next_holiday.DaysUntil()))
+		message, _  := json.Marshal(n)
+		
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(message))
 
