@@ -24,36 +24,34 @@ func main() {
 		PORT = "3002"
 	}
 
-	
 	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
-		result, err  := database.GetAllHolidaysAsJSON(REDIS_DB)
+		time_iso := time.Now().Format(time.RFC3339)
+		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
+		result, err := database.GetAllHolidaysAsJSON(REDIS_DB)
 		if err != nil {
-			panic (err)
+			panic(err)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(*result))
-		time_iso := time.Now().Format(time.RFC3339)
-		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
 	})
-	
+
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
-		result, err  :=  database.GetAllHolidays(REDIS_DB)
+		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time.Now().Format(time.RFC3339))
+		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
-			panic (err)
+			panic(err)
 		}
 
-		holiday.SortHolidaysArray(*result)
-		fmt.Println(result)
+		holiday.SortHolidaysArray(*all_holidays)
+		next_holiday := holiday.FindNextHoliday(*all_holidays)
+		fmt.Println(next_holiday)
 		// w.Header().Set("Content-Type", "application/json")
-		time_iso := time.Now().Format(time.RFC3339)
-		message := fmt.Sprintf("Hellos World at %v", time_iso)
-
+		message := fmt.Sprintf("el Siguiente Festivo es %v %v", next_holiday.Name, next_holiday.Date)
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(message))
-		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
-	
+
 	})
 
 	fmt.Printf("listening on %s\n", PORT)
