@@ -39,8 +39,8 @@ func main() {
 	})
 
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
-
-		fmt.Printf("local: %v -- utc-5:%v\n", time.Now().Format(time.RFC3339), holiday.GetUTC5Time().Format(time.RFC3339))
+		t , _ := holiday.MakeDates(holiday.Holiday{})
+		fmt.Printf("local: %v -- utc-5:%v\n", time.Now().Format(time.RFC3339), t.Format(time.RFC3339))
 		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
 			panic(err)
