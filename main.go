@@ -39,6 +39,8 @@ func main() {
 	})
 
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
+
+		fmt.Printf("local: %v -- utc-5:%v\n", time.Now().Format(time.RFC3339), holiday.GetUTC5Time().Format(time.RFC3339))
 		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -56,8 +58,9 @@ func main() {
 	})
 
 	http.HandleFunc("/gif", HandleGifRoute)
-
+	fmt.Println("running at", PORT)
 	http.ListenAndServe(":"+PORT, nil)
+
 }
 
 func HandleGifRoute(w http.ResponseWriter, r *http.Request) {

@@ -41,7 +41,7 @@ func SortHolidaysArray(holidays []Holiday) {
 }
 
 func FindNextHoliday(holidays []Holiday) *Holiday {
-	current_time := time.Now()
+	current_time := GetUTC5Time()
 	for _, h := range holidays {
 		holiday_date, _ := time.Parse(time.RFC3339, h.Date)
 		if holiday_date.After(current_time) {
@@ -54,7 +54,7 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 func (h Holiday) IsToday() bool {
 	holidayDate, _ := time.Parse(time.RFC3339, h.Date)
 
-	currentDate := time.Now()
+	currentDate := GetUTC5Time()
 
 	return holidayDate.Year() == currentDate.Year() &&
 		holidayDate.Month() == currentDate.Month() &&
@@ -63,7 +63,12 @@ func (h Holiday) IsToday() bool {
 
 func (h Holiday) DaysUntil() int {
 	holidayDate, _ := time.Parse(time.RFC3339, h.Date)
-	currentDate := time.Now()
+	currentDate := GetUTC5Time()
 	daysUntil := math.Ceil(holidayDate.Sub(currentDate).Hours() / 24)
 	return int(daysUntil)
+}
+
+func GetUTC5Time() time.Time {
+	loc := time.FixedZone("UTC-5", -5*60*60)
+	return time.Now().In(loc)
 }
