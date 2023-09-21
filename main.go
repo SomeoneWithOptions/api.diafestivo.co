@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
@@ -27,8 +26,8 @@ func main() {
 	}
 
 	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
-		time_iso := time.Now().Format(time.RFC3339)
-		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, time_iso)
+		t, _ := holiday.MakeDates(holiday.Holiday{})
+		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
 		result, err := database.GetAllHolidaysAsJSON(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -39,8 +38,8 @@ func main() {
 	})
 
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
-		t , _ := holiday.MakeDates(holiday.Holiday{})
-		fmt.Printf("local: %v -- utc-5:%v\n", time.Now().Format(time.RFC3339), t.Format(time.RFC3339))
+		t, _ := holiday.MakeDates(holiday.Holiday{})
+		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
 		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -64,6 +63,8 @@ func main() {
 }
 
 func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
+	t, _ := holiday.MakeDates(holiday.Holiday{})
+	fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
 	gif_url := giphy.GetGifURL()
 	w.Write([]byte(gif_url))
 }
