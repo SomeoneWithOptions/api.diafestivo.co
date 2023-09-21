@@ -57,9 +57,9 @@ func main() {
 	})
 
 	http.HandleFunc("/gif", HandleGifRoute)
+	http.HandleFunc("/", HandleInvaliedRoute)
 	fmt.Println("running at", PORT)
 	http.ListenAndServe(":"+PORT, nil)
-
 }
 
 func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
@@ -67,4 +67,11 @@ func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
 	gif_url := giphy.GetGifURL()
 	w.Write([]byte(gif_url))
+}
+
+func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
+	t, _ := holiday.MakeDates(holiday.Holiday{})
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 not found"))
+	fmt.Printf("invalid route \"%v\" at %v", r.URL, t)
 }
