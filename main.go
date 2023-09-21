@@ -27,7 +27,7 @@ func main() {
 
 	http.HandleFunc("/all", func(w http.ResponseWriter, r *http.Request) {
 		t, _ := holiday.MakeDates(holiday.Holiday{})
-		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
+		fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
 		result, err := database.GetAllHolidaysAsJSON(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -39,7 +39,7 @@ func main() {
 
 	http.HandleFunc("/next", func(w http.ResponseWriter, r *http.Request) {
 		t, _ := holiday.MakeDates(holiday.Holiday{})
-		fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
+		fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
 		all_holidays, err := database.GetAllHolidays(REDIS_DB)
 		if err != nil {
 			panic(err)
@@ -64,7 +64,7 @@ func main() {
 
 func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
-	fmt.Printf("the URL \"%v\"  was requested at %v\n", r.URL, t)
+	fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
 	gif_url := giphy.GetGifURL()
 	w.Write([]byte(gif_url))
 }
@@ -73,5 +73,5 @@ func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("404 not found"))
-	fmt.Printf("invalid route \"%v\" at %v", r.URL, t)
+	fmt.Printf("invalid route \"%v\" at %v\n", r.URL, t)
 }
