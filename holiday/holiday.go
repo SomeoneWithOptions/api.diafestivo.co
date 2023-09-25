@@ -52,10 +52,7 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 }
 
 func (h Holiday) IsToday() bool {
-
 	currentDate, holidayDate := MakeDates(h)
-	// holidayDate, _ := time.Parse(time.RFC3339, h.Date)
-	// currentDate := GetUTC5Time()
 	return holidayDate.Year() == currentDate.Year() &&
 		holidayDate.Month() == currentDate.Month() &&
 		holidayDate.Day() == currentDate.Day()
