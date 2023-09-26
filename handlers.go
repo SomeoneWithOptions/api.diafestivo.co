@@ -21,6 +21,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(*result))
 }
@@ -53,6 +54,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	message, _ := json.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(message))
 
@@ -62,6 +64,7 @@ func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
 	gif_url := giphy.GetGifURL()
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write([]byte(gif_url))
 }
 
