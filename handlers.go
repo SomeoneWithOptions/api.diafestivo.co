@@ -12,6 +12,12 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
+type InvalidRoute struct {
+	Status      int      `json:"status"`
+	Message     string   `json:"message"`
+	ValidRoutes []string `json:"valid_routes"`
+}
+
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	REDIS_DB := os.Getenv("REDIS_DB")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
@@ -70,7 +76,11 @@ func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("404 not found"))
+	m := InvalidRoute{404, "Please Use Valid Routes :", []string{"/all", "/next"}}
+	invalidRouteResponse, _ := json.Marshal(m)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write(invalidRouteResponse)
 	fmt.Printf("invalid route \"%v\" at %v\n", r.URL, t)
 }
