@@ -82,5 +82,10 @@ func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write(invalidRouteResponse)
+
 	fmt.Printf("invalid route \"%v\" at %v\n", r.URL, t)
+
+	for k, v := range r.Header {
+		fmt.Printf("%v : %v \n", k, v)
+	}
 }
