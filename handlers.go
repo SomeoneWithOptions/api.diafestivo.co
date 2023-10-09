@@ -38,6 +38,10 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
 
+	for k, v := range r.Header {
+		fmt.Printf("%v : %v \n", k, v)
+	}
+
 	current_year := time.Now().Year()
 	var all_holidays *[]holiday.Holiday
 	var err error
