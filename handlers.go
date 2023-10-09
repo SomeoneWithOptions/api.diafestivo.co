@@ -19,13 +19,15 @@ type InvalidRoute struct {
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
+	logMessage(r)
+
 	REDIS_DB := os.Getenv("REDIS_DB")
-	t, _ := holiday.MakeDates(holiday.Holiday{})
-	fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
+
 	result, err := database.GetAllHolidaysAsJSON(REDIS_DB)
 	if err != nil {
 		panic(err)
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -34,13 +36,8 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 
+	logMessage(r)
 	REDIS_DB := os.Getenv("REDIS_DB")
-	t, _ := holiday.MakeDates(holiday.Holiday{})
-	fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
-
-	for k, v := range r.Header {
-		fmt.Printf("%v : %v \n", k, v)
-	}
 
 	current_year := time.Now().Year()
 	var all_holidays *[]holiday.Holiday
@@ -67,29 +64,28 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(message))
-
 }
 
 func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
-	t, _ := holiday.MakeDates(holiday.Holiday{})
-	fmt.Printf("the URL \"%v\" was requested at %v\n", r.URL, t)
+	logMessage(r)
 	gif_url := giphy.GetGifURL()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write([]byte(gif_url))
 }
 
 func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
-	t, _ := holiday.MakeDates(holiday.Holiday{})
+	logMessage(r)
 	m := InvalidRoute{404, "Please Use Valid Routes :", []string{"/all", "/next"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write(invalidRouteResponse)
+}
 
-	fmt.Printf("invalid route \"%v\" at %v\n", r.URL, t)
-
-	for k, v := range r.Header {
-		fmt.Printf("%v : %v \n", k, v)
-	}
+func logMessage(r *http.Request) {
+	ip := r.Header.Get("X-Forwarded-For")
+	p := r.Header.Get("X-Forwarded-Proto")
+	t, _ := holiday.MakeDates(holiday.Holiday{})
+	fmt.Printf("requested: \"%v\" at: %v from: %v over: %v\n", r.URL, t.Format("02-01-2006:15:04:05"), ip, p)
 }
