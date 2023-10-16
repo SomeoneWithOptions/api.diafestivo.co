@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
@@ -20,10 +19,7 @@ type InvalidRoute struct {
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	logMessage(r)
-
-	REDIS_DB := os.Getenv("REDIS_DB")
-
-	result, err := database.GetAllHolidaysAsJSON(REDIS_DB)
+	result, err := database.GetAllHolidaysAsJSON(redisClient)
 	if err != nil {
 		panic(err)
 	}
@@ -35,14 +31,11 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
-
 	logMessage(r)
-	REDIS_DB := os.Getenv("REDIS_DB")
-
 	current_year := time.Now().Year()
 	var all_holidays *[]holiday.Holiday
 	var err error
-	all_holidays, err = database.GetAllHolidays(REDIS_DB, current_year)
+	all_holidays, err = database.GetAllHolidays(redisClient, current_year)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +45,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 
 	if next_holiday == nil {
 		next_year := time.Now().Year() + 1
-		all_holidays, _ = database.GetAllHolidays(REDIS_DB, next_year)
+		all_holidays, _ = database.GetAllHolidays(redisClient, next_year)
 		holiday.SortHolidaysArray(*all_holidays)
 		next_holiday = holiday.FindNextHoliday(*all_holidays)
 	}

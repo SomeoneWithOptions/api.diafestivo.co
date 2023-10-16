@@ -6,13 +6,22 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	r "github.com/redis/go-redis/v9"
 )
+
+var redisClient *r.Client
 
 func main() {
 
 	if err := godotenv.Load(); err != nil {
 		fmt.Printf("error loading .env file: %v\n", err)
 	}
+
+	opt, errParse := r.ParseURL(os.Getenv("REDIS_DB"))
+	if errParse != nil {
+		fmt.Printf("error parsing DB String: %v", errParse)
+	}
+	redisClient = r.NewClient(opt)
 
 	PORT := os.Getenv("PORT")
 
