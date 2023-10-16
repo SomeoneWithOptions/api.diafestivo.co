@@ -44,6 +44,12 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 	current_time, _ := MakeDates(Holiday{})
 	for _, h := range holidays {
 		_, holiday_date := MakeDates(h)
+
+		if holiday_date.Year() == current_time.Year() &&
+			holiday_date.Month() == current_time.Month() &&
+			holiday_date.Day() == current_time.Day() {
+			return &h
+		}
 		if holiday_date.After(current_time) {
 			return &h
 		}
