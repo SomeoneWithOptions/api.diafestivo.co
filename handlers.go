@@ -82,12 +82,10 @@ func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
 
 func logMessage(r *http.Request) {
 	token := os.Getenv("IP_INFO_TOKEN")
-	fmt.Println(token)
 	ip := r.Header.Get("X-Forwarded-For")
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
-	client := ipinfo.NewClient(nil, nil, token)
-	info, _ := client.GetIPInfo(net.ParseIP(ip))
-	fmt.Printf("\"%v\" at: %v using: %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p)
-	fmt.Printf("%v, %v, %v, %v, % v\n", ip, info.City, info.Region, info.Country, info.Timezone)
+	ip_info_client := ipinfo.NewClient(nil, nil, token)
+	info, _ := ip_info_client.GetIPInfo(net.ParseIP(ip))
+	fmt.Printf("\"%v\" %v %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country, info.Timezone)
 }
