@@ -3,12 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
+
+	"github.com/ipinfo/go/v2/ipinfo"
 )
 
 type InvalidRoute struct {
@@ -18,7 +22,7 @@ type InvalidRoute struct {
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
-	logMessage(r)
+	go logMessage(r)
 	result, err := database.GetAllHolidaysAsJSON(redisClient)
 	if err != nil {
 		panic(err)
@@ -31,7 +35,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
-	logMessage(r)
+	go logMessage(r)
 	current_year := time.Now().Year()
 	var all_holidays *[]holiday.Holiday
 	var err error
@@ -60,14 +64,14 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
-	logMessage(r)
+	go logMessage(r)
 	gif_url := giphy.GetGifURL()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write([]byte(gif_url))
 }
 
 func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
-	logMessage(r)
+	go logMessage(r)
 	m := InvalidRoute{404, "Please Use Valid Routes :", []string{"/all", "/next"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
@@ -77,8 +81,13 @@ func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func logMessage(r *http.Request) {
+	token := os.Getenv("IP_INFO_TOKEN")
+	fmt.Println(token)
 	ip := r.Header.Get("X-Forwarded-For")
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
-	fmt.Printf("requested: \"%v\" at: %v from: %v over: %v\n", r.URL, t.Format("02-01-2006:15:04:05"), ip, p)
+	client := ipinfo.NewClient(nil, nil, token)
+	info, _ := client.GetIPInfo(net.ParseIP(ip))
+	fmt.Printf("\"%v\" at: %v using: %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p)
+	fmt.Printf("%v, %v, %v, %v, % v\n", ip, info.City, info.Region, info.Country, info.Timezone)
 }
