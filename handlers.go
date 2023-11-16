@@ -87,5 +87,5 @@ func logMessage(r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	ip_info_client := ipinfo.NewClient(nil, nil, token)
 	info, _ := ip_info_client.GetIPInfo(net.ParseIP(ip))
-	fmt.Printf("\"%v\" %v %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country, info.Timezone)
+	fmt.Printf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
 }
