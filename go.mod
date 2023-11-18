@@ -1,6 +1,6 @@
 module github.com/SomeoneWithOptions/api.diafestivo.co
 
-go 1.17
+go 1.21
 
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
