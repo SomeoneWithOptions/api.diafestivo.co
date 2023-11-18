@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
@@ -82,7 +83,7 @@ func HandleInvaliedRoute(w http.ResponseWriter, r *http.Request) {
 
 func logMessage(r *http.Request) {
 	token := os.Getenv("IP_INFO_TOKEN")
-	ip := r.Header.Get("X-Forwarded-For")
+	ip := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	ip_info_client := ipinfo.NewClient(nil, nil, token)
