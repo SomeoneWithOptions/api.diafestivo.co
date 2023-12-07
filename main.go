@@ -23,6 +23,8 @@ func main() {
 	}
 	redisClient = r.NewClient(opt)
 
+	defer redisClient.Close()
+
 	PORT := os.Getenv("PORT")
 
 	if PORT == "" {
