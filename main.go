@@ -34,7 +34,7 @@ func main() {
 	http.HandleFunc("/all", HandleAllRoute)
 	http.HandleFunc("/next", HandleNextRoute)
 	http.HandleFunc("/gif", HandleGifRoute)
-	http.HandleFunc("/", HandleInvaliedRoute)
+	http.HandleFunc("/", HandleInvalidRoute)
 
 	fmt.Println("running at", PORT)
 	http.ListenAndServe(":"+PORT, nil)
