@@ -71,6 +71,12 @@ func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(gif_url))
 }
 
+func HandlePingRoute(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("OK"))
+}
+
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	m := InvalidRoute{404, "Please Use Valid Routes :", []string{"/all", "/next"}}
