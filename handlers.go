@@ -38,25 +38,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	current_year := time.Now().Year()
-	var all_holidays *[]holiday.Holiday
-	var err error
-	all_holidays, err = database.GetAllHolidays(redisClient, current_year)
-	if err != nil {
-		panic(err)
-	}
-
-	holiday.SortHolidaysArray(*all_holidays)
-	var next_holiday = holiday.FindNextHoliday(*all_holidays)
-
-	if next_holiday == nil {
-		next_year := time.Now().Year() + 1
-		all_holidays, _ = database.GetAllHolidays(redisClient, next_year)
-		holiday.SortHolidaysArray(*all_holidays)
-		next_holiday = holiday.FindNextHoliday(*all_holidays)
-	}
-
-	n := holiday.NewNextHoliday(next_holiday.Name, next_holiday.Date, next_holiday.IsToday(), int32(next_holiday.DaysUntil()))
+	n := MakeNextNewHoliday()
 	message, _ := json.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -84,11 +66,34 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-    w.Header().Set("Content-Type", "text/html")
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
 	tmpl, _ := template.ParseFiles("./template/index.html")
 	tmpl.Execute(w, nil)
+}
+
+func MakeNextNewHoliday() holiday.NextHoliday {
+	current_year := time.Now().Year()
+	var all_holidays *[]holiday.Holiday
+	var err error
+	all_holidays, err = database.GetAllHolidays(redisClient, current_year)
+	if err != nil {
+		panic(err)
+	}
+
+	holiday.SortHolidaysArray(*all_holidays)
+	var next_holiday = holiday.FindNextHoliday(*all_holidays)
+
+	if next_holiday == nil {
+		next_year := time.Now().Year() + 1
+		all_holidays, _ = database.GetAllHolidays(redisClient, next_year)
+		holiday.SortHolidaysArray(*all_holidays)
+		next_holiday = holiday.FindNextHoliday(*all_holidays)
+	}
+
+	n := holiday.NewNextHoliday(next_holiday.Name, next_holiday.Date, next_holiday.IsToday(), int32(next_holiday.DaysUntil()))
+	return n
 }
 
 func logMessage(r *http.Request) {
