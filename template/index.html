@@ -1,13 +1,11 @@
 <p class="title-text yellow-accent">¿Es Hoy Festivo en Colombia?</p>
 <p class="normal-text blue-accent">
-    {{if .IsToday}}
-    SI :)
-    {{else}}
-    NO :(
-    {{end}}
+    {{if .IsToday}}SI :){{else}}NO :({{end}}
 </p>
+{{if not .IsToday}}
 <p class="thin-text">Aún
     {{if gt .DaysUntil 1}} Faltan {{else}} Falta {{end}}
     {{.DaysUntil}}
     {{if gt .DaysUntil 1}} Días {{else}} Día {{end}}
 </p>
+{{else}}{{end}}
