@@ -1,11 +1,21 @@
 <p class="title-text yellow-accent">¿Es Hoy Festivo en Colombia?</p>
+
 <p class="normal-text blue-accent">
     {{if .IsToday}}SI :){{else}}NO :({{end}}
 </p>
+
 {{if not .IsToday}}
 <p class="thin-text">Aún
     {{if gt .DaysUntil 1}} Faltan {{else}} Falta {{end}}
     {{.DaysUntil}}
     {{if gt .DaysUntil 1}} Días {{else}} Día {{end}}
 </p>
+{{else}}{{end}}
+
+{{if not .IsToday}}
+<p class="thin-text">El próximo festivo es el día Lunes, 25 de Diciembre de 2023</p>
+{{else}}{{end}}
+
+{{if not .IsToday}}
+<p class="normal-text red-accent"> Celebraremos el Día de Navidad</p>
 {{else}}{{end}}

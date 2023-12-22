@@ -69,8 +69,8 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	// n := MakeNextNewHoliday()
-	n := holiday.NewNextHoliday("Dia Festivo", "date", true, 1)
+	n := MakeNextNewHoliday()
+	// n := holiday.NewNextHoliday("Dia Festivo", "date", true, 1)
 	tmpl, _ := template.ParseFiles("./template/index.html")
 	tmpl.Execute(w, n)
 }
