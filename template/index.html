@@ -14,8 +14,11 @@
 
 {{if not .IsToday}}
 <p class="thin-text">El próximo festivo es el día Lunes, 25 de Diciembre de 2023</p>
+<p>{{.Date}}</p>
 {{else}}{{end}}
 
-{{if not .IsToday}}
-<p class="normal-text red-accent"> Celebraremos el Día de Navidad</p>
-{{else}}{{end}}
+<p class="normal-text red-accent">
+    {{if .IsToday}}Celebramos {{ .Name}}
+    {{else}}Celebraremos {{ .Name}}
+    {{end}}
+</p>
