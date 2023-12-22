@@ -13,6 +13,7 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
+	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
 
 	"github.com/ipinfo/go/v2/ipinfo"
 )
@@ -66,13 +67,21 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	var gif_url string = ""
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
+
 	nh := MakeNextNewHoliday()
-	n := holiday.NewNextHoliday(nh.Name, nh.Date, false, 2)
-	tmpl, _ := template.ParseFiles("./template/index.html")
-	tmpl.Execute(w, n)
+
+	if false {
+		gif_url = giphy.GetGifURL()
+	}
+	
+	t := templateinfo.NewTemplateInfo(nh.Name, true, 3, nh.Date, gif_url)
+
+	tmpl, _ := template.ParseFiles("./templateinfo/index.html")
+	w.WriteHeader(http.StatusOK)
+	tmpl.Execute(w, t)
 }
 
 func MakeNextNewHoliday() holiday.NextHoliday {

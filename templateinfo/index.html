@@ -18,7 +18,11 @@
 {{else}}{{end}}
 
 <p class="normal-text red-accent">
-    {{if .IsToday}}Celebramos {{ .Name}}
-    {{else}}Celebraremos {{ .Name}}
+    {{if .IsToday}}Celebramos {{ .Name }}
+    {{else}}Celebraremos {{ .Name }}
     {{end}}
 </p>
+
+{{if .IsToday}}
+<img src="{{ .GifURL }}" alt="Celebrating GIF">
+{{else}}{{end}}
