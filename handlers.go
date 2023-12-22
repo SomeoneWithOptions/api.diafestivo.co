@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net"
 	"net/http"
 	"os"
@@ -79,6 +80,15 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write(invalidRouteResponse)
+}
+
+func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+    w.Header().Set("Content-Type", "text/html")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.WriteHeader(http.StatusOK)
+	tmpl, _ := template.ParseFiles("./template/index.html")
+	tmpl.Execute(w, nil)
 }
 
 func logMessage(r *http.Request) {
