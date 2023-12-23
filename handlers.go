@@ -100,11 +100,11 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 
 	t, _ := time.Parse(time.RFC3339, nh.Date)
 
-	if true {
+	if nh.IsToday {
 		gif_url = giphy.GetGifURL()
 	}
 
-	ti := templateinfo.NewTemplateInfo(nh.Name, true, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
+	ti := templateinfo.NewTemplateInfo(nh.Name, nh.IsToday, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
 
 	tmpl, _ := template.ParseFiles("./templateinfo/index.html")
 	w.WriteHeader(http.StatusOK)
