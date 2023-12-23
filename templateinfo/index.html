@@ -13,8 +13,14 @@
 {{else}}{{end}}
 
 {{if not .IsToday}}
-<p class="thin-text">El próximo festivo es el día Lunes, 25 de Diciembre de 2023</p>
-<p>{{.Date}}</p>
+<p class="thin-text">
+    El próximo festivo es el día
+    {{.Weekday}},
+    {{.Day}}
+    de
+    {{.Month}}
+    de
+    {{.Year}}</p>
 {{else}}{{end}}
 
 <p class="normal-text red-accent">
@@ -24,5 +30,11 @@
 </p>
 
 {{if .IsToday}}
-<img src="{{ .GifURL }}" alt="Celebrating GIF">
+<div class="gifContainer">
+    <img src="{{ .GifURL }}" alt="Celebrating GIF" class="gif">
+</div>
+{{else}}{{end}}
+
+{{if .IsToday}}
+<img src="./assets/giphyattributionmark.png" alt="Giphy Attribution Mark" class="giphy-attribution-mark">
 {{else}}{{end}}
