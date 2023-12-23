@@ -76,7 +76,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	if false {
 		gif_url = giphy.GetGifURL()
 	}
-	
+
 	t := templateinfo.NewTemplateInfo(nh.Name, true, 3, nh.Date, gif_url)
 
 	tmpl, _ := template.ParseFiles("./templateinfo/index.html")
