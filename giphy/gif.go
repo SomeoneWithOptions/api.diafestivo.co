@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"time"
 
 	j "github.com/json-iterator/go"
 )
@@ -20,9 +19,6 @@ func GetGifURL() string {
 	defer res.Body.Close()
 	resBytes, _ := io.ReadAll(res.Body)
 	var gif Gif
-	start := time.Now()
 	j.Unmarshal(resBytes, &gif)
-	end := time.Since(start)
-	fmt.Printf("%v\n", end)
 	return gif.Data.Images.Original.URL
 }
