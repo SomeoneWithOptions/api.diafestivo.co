@@ -14,25 +14,27 @@ func GetAllHolidaysAsJSON(r *r.Client) (*string, error) {
 	c_date, _ := holiday.MakeDates(holiday.Holiday{})
 
 	redis_key := fmt.Sprintf("holidays:%v", c_date.Year())
-	db_json, errRedis := r.Get(ctx, redis_key).Result()
-	if errRedis != nil {
-		return nil, errRedis
+	holidays_json, err := r.Get(ctx, redis_key).Result()
+
+	if err != nil {
+		return nil, err
 	}
 
-	return &db_json, nil
+	return &holidays_json, nil
 }
 
 func GetAllHolidays(r *r.Client, year int) (*[]holiday.Holiday, error) {
 	ctx := context.Background()
 	redis_key := fmt.Sprintf("holidays:%v", year)
-	db_json, errRedis := r.Get(ctx, redis_key).Result()
+	holidaysJSON, err := r.Get(ctx, redis_key).Result()
 
-	if errRedis != nil {
-		return nil, errRedis
+	if err != nil {
+		return nil, err
 	}
 
 	var holidays []holiday.Holiday
-	j.Unmarshal([]byte(db_json), &holidays)
+	j.Unmarshal([]byte(holidaysJSON), &holidays)
 
 	return &holidays, nil
 }
+
