@@ -112,10 +112,10 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func MakeNextNewHoliday() holiday.NextHoliday {
-	current_year := time.Now().Year()
+	current_date, _ := holiday.MakeDates(holiday.Holiday{})
 	var all_holidays *[]holiday.Holiday
 	var err error
-	all_holidays, err = database.GetAllHolidays(redisClient, current_year)
+	all_holidays, err = database.GetAllHolidays(redisClient, current_date.Year())
 	if err != nil {
 		panic(err)
 	}
