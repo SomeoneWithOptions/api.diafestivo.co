@@ -1,5 +1,0 @@
-runtime: go121
-env_variables:
-  REDIS_DB: $_REDIS_DB
-  GIPHY_KEY: $_GIPHY_KEY
-  IP_INFO_TOKEN: $_IP_INFO_TOKEN
