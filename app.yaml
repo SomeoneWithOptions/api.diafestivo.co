@@ -1,6 +1,5 @@
 runtime: go121
-instance_class: F1
-automatic_scaling:
-  min_instances: 1
-  max_instances: 2
-  target_cpu_utilization: 0.9
+env_variables:
+  REDIS_DB: $_REDIS_DB
+  GIPHY_KEY: $_GIPHY_KEY
+  IP_INFO_TOKEN: $_IP_INFO_TOKEN
