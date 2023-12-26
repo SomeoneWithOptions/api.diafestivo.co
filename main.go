@@ -33,7 +33,6 @@ func main() {
 
 	http.HandleFunc("/all", HandleAllRoute)
 	http.HandleFunc("/next", HandleNextRoute)
-	http.HandleFunc("/gif", HandleGifRoute)
 	http.HandleFunc("/template", HandleTemplateRoute)
 	http.HandleFunc("/", HandleInvalidRoute)
 
