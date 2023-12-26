@@ -66,12 +66,12 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	n := GetNextHoliday()
-	message, _ := j.Marshal(n)
+	n_holiday_json, _ := j.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(message))
+	w.Write([]byte(n_holiday_json))
 }
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
@@ -94,33 +94,34 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 		gif_url = giphy.GetGifURL()
 	}
 
-	ti := templateinfo.NewTemplateInfo(nh.Name, nh.IsToday, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
+	t_info := templateinfo.NewTemplateInfo(nh.Name, nh.IsToday, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
 
 	tmpl, _ := template.ParseFiles("./templateinfo/index.html")
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	tmpl.Execute(w, ti)
+	tmpl.Execute(w, t_info)
 }
 
 func GetNextHoliday() holiday.NextHoliday {
-	current_date, _ := holiday.MakeDates(holiday.Holiday{})
-	all_holidays, err := database.GetAllHolidays(redisClient, current_date.Year())
+	c_date, _ := holiday.MakeDates(holiday.Holiday{})
+	a_holidays, err := database.GetAllHolidays(redisClient, c_date.Year())
+
 	if err != nil {
 		panic(err)
 	}
 
-	holiday.SortHolidaysArray(*all_holidays)
-	var next_holiday = holiday.FindNextHoliday(*all_holidays)
+	holiday.SortHolidaysArray(*a_holidays)
+	var n_holiday = holiday.FindNextHoliday(*a_holidays)
 
-	if next_holiday == nil {
+	if n_holiday == nil {
 		next_year := time.Now().Year() + 1
-		all_holidays, _ = database.GetAllHolidays(redisClient, next_year)
-		holiday.SortHolidaysArray(*all_holidays)
-		next_holiday = holiday.FindNextHoliday(*all_holidays)
+		a_holidays, _ = database.GetAllHolidays(redisClient, next_year)
+		holiday.SortHolidaysArray(*a_holidays)
+		n_holiday = holiday.FindNextHoliday(*a_holidays)
 	}
 
-	n := holiday.NewNextHoliday(next_holiday.Name, next_holiday.Date, next_holiday.IsToday(), next_holiday.DaysUntil())
+	n := holiday.NewNextHoliday(n_holiday.Name, n_holiday.Date, n_holiday.IsToday(), n_holiday.DaysUntil())
 	return n
 }
 

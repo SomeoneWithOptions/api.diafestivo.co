@@ -21,10 +21,9 @@ func main() {
 	if errParse != nil {
 		fmt.Printf("error parsing DB String: %v", errParse)
 	}
+
 	redisClient = r.NewClient(opt)
-
 	defer redisClient.Close()
-
 	PORT := os.Getenv("PORT")
 
 	if PORT == "" {
