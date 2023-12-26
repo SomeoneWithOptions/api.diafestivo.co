@@ -11,7 +11,7 @@ type NextHoliday struct {
 	Name      string `json:"name"`
 	Date      string `json:"date"`
 	IsToday   bool   `json:"isToday"`
-	DaysUntil int32  `json:"daysUntil"`
+	DaysUntil int8   `json:"daysUntil"`
 }
 
 type Holiday struct {
@@ -19,7 +19,7 @@ type Holiday struct {
 	Date string `json:"date"`
 }
 
-func NewNextHoliday(name string, date string, is_today bool, days_until int32) NextHoliday {
+func NewNextHoliday(name string, date string, is_today bool, days_until int8) NextHoliday {
 	var next_holiday NextHoliday
 	next_holiday.Name = name
 	next_holiday.Date = date
@@ -45,9 +45,7 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 	for _, h := range holidays {
 		_, holiday_date := MakeDates(h)
 
-		if holiday_date.Year() == current_time.Year() &&
-			holiday_date.Month() == current_time.Month() &&
-			holiday_date.Day() == current_time.Day() {
+		if h.IsToday() {
 			return &h
 		}
 		if holiday_date.After(current_time) {
@@ -64,20 +62,16 @@ func (h Holiday) IsToday() bool {
 		holidayDate.Day() == currentDate.Day()
 }
 
-func (h Holiday) DaysUntil() int {
-
+func (h Holiday) DaysUntil() int8 {
 	currentDate, holidayDate := MakeDates(h)
-
 	daysUntil := math.Ceil(holidayDate.Sub(currentDate).Hours() / 24)
-	return int(daysUntil)
+	return int8(daysUntil)
 }
 
 func MakeDates(h Holiday) (time.Time, time.Time) {
 	loc := time.FixedZone("UTC-5", -5*60*60)
 	hd, _ := time.Parse(time.RFC3339, h.Date)
-
 	holidayDate := hd.In(loc).Add(time.Hour * 5)
 	currentDate := time.Now().In(loc)
-
 	return currentDate, holidayDate
 }

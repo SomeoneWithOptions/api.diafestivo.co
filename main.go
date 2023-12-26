@@ -21,10 +21,9 @@ func main() {
 	if errParse != nil {
 		fmt.Printf("error parsing DB String: %v", errParse)
 	}
+
 	redisClient = r.NewClient(opt)
-
 	defer redisClient.Close()
-
 	PORT := os.Getenv("PORT")
 
 	if PORT == "" {
@@ -33,7 +32,7 @@ func main() {
 
 	http.HandleFunc("/all", HandleAllRoute)
 	http.HandleFunc("/next", HandleNextRoute)
-	http.HandleFunc("/gif", HandleGifRoute)
+	http.HandleFunc("/template", HandleTemplateRoute)
 	http.HandleFunc("/", HandleInvalidRoute)
 
 	fmt.Println("running at", PORT)

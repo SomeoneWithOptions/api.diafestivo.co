@@ -1,0 +1,40 @@
+<p class="title-text yellow-accent">¿Es Hoy Festivo en Colombia?</p>
+
+<p class="normal-text blue-accent">
+    {{if .IsToday}}SI :){{else}}NO :({{end}}
+</p>
+
+{{if not .IsToday}}
+<p class="thin-text">Aún
+    {{if gt .DaysUntil 1}} Faltan {{else}} Falta {{end}}
+    {{.DaysUntil}}
+    {{if gt .DaysUntil 1}} Días {{else}} Día {{end}}
+</p>
+{{else}}{{end}}
+
+{{if not .IsToday}}
+<p class="thin-text">
+    El próximo festivo es el día
+    {{.Weekday}},
+    {{.Day}}
+    de
+    {{.Month}}
+    de
+    {{.Year}}</p>
+{{else}}{{end}}
+
+<p class="normal-text red-accent">
+    {{if .IsToday}}Celebramos {{ .Name }}
+    {{else}}Celebraremos {{ .Name }}
+    {{end}}
+</p>
+
+{{if .IsToday}}
+<div class="gifContainer">
+    <img src="{{ .GifURL }}" alt="Celebrating GIF" class="gif">
+</div>
+{{else}}{{end}}
+
+{{if .IsToday}}
+<img src="./assets/giphyattributionmark.png" alt="Giphy Attribution Mark" class="giphy-attribution-mark">
+{{else}}{{end}}

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net"
 	"net/http"
 	"os"
@@ -12,14 +13,41 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
+	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
 
 	"github.com/ipinfo/go/v2/ipinfo"
+	j "github.com/json-iterator/go"
 )
 
 type InvalidRoute struct {
 	Status      int      `json:"status"`
 	Message     string   `json:"message"`
 	ValidRoutes []string `json:"valid_routes"`
+}
+
+var months = map[int]string{
+	1:  "Enero",
+	2:  "Febrero",
+	3:  "Marzo",
+	4:  "Abril",
+	5:  "Mayo",
+	6:  "Junio",
+	7:  "Julio",
+	8:  "Agosto",
+	9:  "Septiembre",
+	10: "Octubre",
+	11: "Noviembre",
+	12: "Diciembre",
+}
+
+var weekDays = map[int]string{
+	1: "Lunes",
+	2: "Martes",
+	3: "Miercoles",
+	4: "Jueves",
+	5: "Viernes",
+	6: "Sabado",
+	0: "Domingo",
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
@@ -37,38 +65,13 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	current_year := time.Now().Year()
-	var all_holidays *[]holiday.Holiday
-	var err error
-	all_holidays, err = database.GetAllHolidays(redisClient, current_year)
-	if err != nil {
-		panic(err)
-	}
-
-	holiday.SortHolidaysArray(*all_holidays)
-	var next_holiday = holiday.FindNextHoliday(*all_holidays)
-
-	if next_holiday == nil {
-		next_year := time.Now().Year() + 1
-		all_holidays, _ = database.GetAllHolidays(redisClient, next_year)
-		holiday.SortHolidaysArray(*all_holidays)
-		next_holiday = holiday.FindNextHoliday(*all_holidays)
-	}
-
-	n := holiday.NewNextHoliday(next_holiday.Name, next_holiday.Date, next_holiday.IsToday(), int32(next_holiday.DaysUntil()))
-	message, _ := json.Marshal(n)
+	n := GetNextHoliday()
+	n_holiday_json, _ := j.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(message))
-}
-
-func HandleGifRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
-	gif_url := giphy.GetGifURL()
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write([]byte(gif_url))
+	w.Write([]byte(n_holiday_json))
 }
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
@@ -79,6 +82,47 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write(invalidRouteResponse)
+}
+
+func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	var gif_url string = ""
+	nh := GetNextHoliday()
+	t, _ := time.Parse(time.RFC3339, nh.Date)
+
+	if nh.IsToday {
+		gif_url = giphy.GetGifURL()
+	}
+
+	t_info := templateinfo.NewTemplateInfo(nh.Name, nh.IsToday, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
+
+	tmpl, _ := template.ParseFiles("./templateinfo/index.html")
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	tmpl.Execute(w, t_info)
+}
+
+func GetNextHoliday() holiday.NextHoliday {
+	c_date, _ := holiday.MakeDates(holiday.Holiday{})
+	a_holidays, err := database.GetAllHolidays(redisClient, c_date.Year())
+
+	if err != nil {
+		panic(err)
+	}
+
+	holiday.SortHolidaysArray(*a_holidays)
+	var n_holiday = holiday.FindNextHoliday(*a_holidays)
+
+	if n_holiday == nil {
+		next_year := time.Now().Year() + 1
+		a_holidays, _ = database.GetAllHolidays(redisClient, next_year)
+		holiday.SortHolidaysArray(*a_holidays)
+		n_holiday = holiday.FindNextHoliday(*a_holidays)
+	}
+
+	n := holiday.NewNextHoliday(n_holiday.Name, n_holiday.Date, n_holiday.IsToday(), n_holiday.DaysUntil())
+	return n
 }
 
 func logMessage(r *http.Request) {
