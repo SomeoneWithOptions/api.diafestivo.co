@@ -16,6 +16,7 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
 
 	"github.com/ipinfo/go/v2/ipinfo"
+	j "github.com/json-iterator/go"
 )
 
 type InvalidRoute struct {
@@ -64,8 +65,8 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	n := MakeNextNewHoliday()
-	message, _ := json.Marshal(n)
+	n := GetNextHoliday()
+	message, _ := j.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -93,7 +94,7 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	var gif_url string = ""
-	nh := MakeNextNewHoliday()
+	nh := GetNextHoliday()
 	t, _ := time.Parse(time.RFC3339, nh.Date)
 
 	if nh.IsToday {
@@ -109,7 +110,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, ti)
 }
 
-func MakeNextNewHoliday() holiday.NextHoliday {
+func GetNextHoliday() holiday.NextHoliday {
 	current_date, _ := holiday.MakeDates(holiday.Holiday{})
 	all_holidays, err := database.GetAllHolidays(redisClient, current_date.Year())
 	if err != nil {
