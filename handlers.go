@@ -88,7 +88,11 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	var gif_url string = ""
 	nh := GetNextHoliday()
-	t, _ := time.Parse(time.RFC3339, nh.Date)
+	t, err := time.Parse(time.RFC3339, nh.Date)
+
+	if err != nil {
+		panic("error parsing date")
+	}
 
 	if nh.IsToday {
 		gif_url = giphy.GetGifURL()
@@ -96,7 +100,12 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 
 	t_info := templateinfo.NewTemplateInfo(nh.Name, nh.IsToday, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
 
-	tmpl, _ := template.ParseFiles("./templateinfo/index.html")
+	tmpl, err := template.ParseFiles("./templateinfo/index.html")
+
+	if err != nil {
+		panic("error parsing template")
+	}
+
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -131,6 +140,12 @@ func logMessage(r *http.Request) {
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	ip_info_client := ipinfo.NewClient(nil, nil, token)
-	info, _ := ip_info_client.GetIPInfo(net.ParseIP(ip))
+	info, err := ip_info_client.GetIPInfo(net.ParseIP(ip))
+
+	if err != nil {
+		fmt.Printf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
+		return
+	}
+
 	fmt.Printf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
 }
