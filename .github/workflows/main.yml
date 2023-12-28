@@ -21,11 +21,6 @@ jobs:
           echo "GIPHY_KEY=${{secrets.GIPHY_KEY}}" >> ${{github.workspace}}/.env &&
           echo "REDIS_DB=${{secrets.REDIS_DB}}" >> ${{github.workspace}}/.env &&
           echo "IP_INFO_TOKEN=${{secrets.IP_INFO_TOKEN}}" >> ${{github.workspace}}/.env
-
-      - name: Create app.yaml
-        run: |
-          echo "runtime: go121" >> ${{github.workspace}}/app.yaml
-          echo "instance_class: F4" >> ${{github.workspace}}/app.yaml
       
       - name: Authenticate    
         uses: 'google-github-actions/auth@v2'
