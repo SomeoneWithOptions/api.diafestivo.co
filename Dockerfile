@@ -9,4 +9,5 @@ FROM ubuntu:latest
 WORKDIR /app
 COPY --from=builder /app/api .
 COPY . .
+EXPOSE 3002
 CMD ["./api"]
