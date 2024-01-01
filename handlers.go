@@ -124,7 +124,7 @@ func GetNextHoliday() holiday.NextHoliday {
 	var n_holiday = holiday.FindNextHoliday(*a_holidays)
 
 	if n_holiday == nil {
-		next_year := time.Now().Year() + 1
+		next_year := c_date.Year() + 1
 		a_holidays, _ = database.GetAllHolidays(redisClient, next_year)
 		holiday.SortHolidaysArray(*a_holidays)
 		n_holiday = holiday.FindNextHoliday(*a_holidays)
