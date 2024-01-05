@@ -31,4 +31,4 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v2'
 
       - name : Deploy
-        run : gcloud app deploy --quiet
+        run : gcloud app deploy --version=v1 --no-cache --quiet
