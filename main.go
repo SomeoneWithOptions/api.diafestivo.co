@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,6 +13,8 @@ import (
 var redisClient *r.Client
 
 func main() {
+
+	os.Setenv("GODEBUG", "tls13early=1")
 
 	if err := godotenv.Load(); err != nil {
 		fmt.Printf("error loading .env file: %v\n", err)
@@ -35,6 +38,12 @@ func main() {
 	http.HandleFunc("/template", HandleTemplateRoute)
 	http.HandleFunc("/", HandleInvalidRoute)
 
+	server := &http.Server{
+		TLSConfig: &tls.Config{
+			SessionTicketsDisabled: false,
+		},
+	}
+
 	fmt.Println("running at", PORT)
-	http.ListenAndServe(":"+PORT, nil)
+	http.ListenAndServe(":"+PORT, server.Handler)
 }
