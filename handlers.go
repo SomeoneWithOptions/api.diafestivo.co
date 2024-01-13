@@ -135,6 +135,7 @@ func GetNextHoliday() holiday.NextHoliday {
 }
 
 func logMessage(r *http.Request) {
+	var message string
 	token := os.Getenv("IP_INFO_TOKEN")
 	ip := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	p := r.Header.Get("X-Forwarded-Proto")
@@ -143,9 +144,9 @@ func logMessage(r *http.Request) {
 	info, err := ip_info_client.GetIPInfo(net.ParseIP(ip))
 
 	if err != nil {
-		fmt.Printf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
-		return
+		message = fmt.Sprintf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
+	} else {
+		message = fmt.Sprintf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
 	}
-
-	fmt.Printf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
+	fmt.Printf("%v", message)
 }
