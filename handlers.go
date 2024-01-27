@@ -86,7 +86,7 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	var gif_url string = ""
+	var gif_url *string
 	nh := GetNextHoliday()
 	t, err := time.Parse(time.RFC3339, nh.Date)
 
@@ -112,7 +112,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, t_info)
 }
 
-func GetNextHoliday() holiday.NextHoliday {
+func GetNextHoliday() *holiday.NextHoliday {
 	c_date, _ := holiday.MakeDates(holiday.Holiday{})
 	a_holidays, err := database.GetAllHolidays(redisClient, c_date.Year())
 
@@ -131,7 +131,7 @@ func GetNextHoliday() holiday.NextHoliday {
 	}
 
 	n := holiday.NewNextHoliday(n_holiday.Name, n_holiday.Date, n_holiday.IsToday(), n_holiday.DaysUntil())
-	return n
+	return &n
 }
 
 func logMessage(r *http.Request) {
@@ -144,9 +144,9 @@ func logMessage(r *http.Request) {
 	info, err := ip_info_client.GetIPInfo(net.ParseIP(ip))
 
 	if err != nil {
-		message = fmt.Sprintf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
+		message = fmt.Sprintf("%v %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
 	} else {
-		message = fmt.Sprintf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
+		message = fmt.Sprintf("%v %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
 	}
 	fmt.Printf("%v", message)
 }

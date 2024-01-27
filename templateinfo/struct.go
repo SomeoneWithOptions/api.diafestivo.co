@@ -5,14 +5,14 @@ type TemplateInfo struct {
 	Name      string
 	DaysUntil int8
 	Date      string
-	GifURL    string
+	GifURL    *string
 	Day       int
 	Month     string
 	Year      int
 	Weekday   string
 }
 
-func NewTemplateInfo(name string, is_today bool, days_until int8, date string, gif_url string, day int, month string, year int, week_day string) TemplateInfo {
+func NewTemplateInfo(name string, is_today bool, days_until int8, date string, gif_url *string, day int, month string, year int, week_day string) TemplateInfo {
 	var template_info TemplateInfo
 	template_info.Name = name
 	template_info.IsToday = is_today
