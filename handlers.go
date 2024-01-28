@@ -100,7 +100,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 
 	t_info := templateinfo.NewTemplateInfo(nh.Name, nh.IsToday, nh.DaysUntil, nh.Date, gif_url, t.Day(), months[int(t.Month())], t.Year(), weekDays[int(t.Weekday())])
 
-	tmpl, err := template.ParseFiles("./templateinfo/index.html")
+	tmpl, err := template.ParseFiles("./index.html")
 
 	if err != nil {
 		panic("error parsing template")
