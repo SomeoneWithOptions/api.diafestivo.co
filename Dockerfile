@@ -1,10 +1,11 @@
-FROM golang:latest AS builder
+FROM golang:1.21 AS build
 WORKDIR /app/
 COPY . .
-RUN GOOS=linux GOARCH=amd64 go build -o api
+RUN go mod download
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o api
 
-FROM alpine:latest
+FROM gcr.io/distroless/static-debian12
 WORKDIR /app
-COPY --from=builder /app/api .
-COPY . .
+COPY --from=build /app/api . 
+COPY /index.html .
 CMD ["./api"]
