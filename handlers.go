@@ -144,9 +144,9 @@ func logMessage(r *http.Request) {
 	info, err := ip_info_client.GetIPInfo(net.ParseIP(ip))
 
 	if err != nil {
-		message = fmt.Sprintf("%v %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
+		message = fmt.Sprintf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, "no IP info", "", "")
 	} else {
-		message = fmt.Sprintf("%v %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
+		message = fmt.Sprintf("\"%v\" %v %v %v %v %v %v\n", r.URL, t.Format("02-01-2006:15:04:05"), p, ip, info.City, info.Region, info.Country)
 	}
 	fmt.Printf("%v", message)
 }

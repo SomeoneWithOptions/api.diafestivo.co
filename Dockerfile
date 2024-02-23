@@ -1,4 +1,4 @@
-FROM golang:1.21 AS build
+FROM golang:1.22 AS build
 WORKDIR /app/
 COPY . .
 RUN go mod download
@@ -8,4 +8,5 @@ FROM gcr.io/distroless/static-debian12
 WORKDIR /app
 COPY --from=build /app/api . 
 COPY /index.html .
+COPY . .
 CMD ["./api"]
