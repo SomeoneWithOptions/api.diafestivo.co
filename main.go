@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/tls"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,10 +12,7 @@ import (
 
 var redisClient *r.Client
 
-func main() {
-
-	os.Setenv("GODEBUG", "tls13early=1")
-
+func init() {
 	godotenv.Load()
 
 	opt, errParse := r.ParseURL(os.Getenv("REDIS_DB"))
@@ -24,7 +21,19 @@ func main() {
 	}
 
 	redisClient = r.NewClient(opt)
+
+	err := redisClient.Ping(context.Background()).Err()
+
+	if err != nil {
+		fmt.Printf("error pinging DB: %v", err)
+	}
+
+	fmt.Println("Connected to Redis")
+}
+
+func main() {
 	defer redisClient.Close()
+
 	PORT := os.Getenv("PORT")
 
 	if PORT == "" {
@@ -36,11 +45,5 @@ func main() {
 	http.HandleFunc("/template", HandleTemplateRoute)
 	http.HandleFunc("/", HandleInvalidRoute)
 
-	server := &http.Server{
-		TLSConfig: &tls.Config{
-			SessionTicketsDisabled: false,
-		},
-	}
-
-	http.ListenAndServe(":"+PORT, server.Handler)
+	http.ListenAndServe(":"+PORT, nil)
 }

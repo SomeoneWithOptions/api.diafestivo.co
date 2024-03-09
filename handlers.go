@@ -114,6 +114,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 
 func GetNextHoliday() *holiday.NextHoliday {
 	c_date, _ := holiday.MakeDates(holiday.Holiday{})
+	fmt.Println("Year: ", c_date.Year())
 	a_holidays, err := database.GetAllHolidays(redisClient, c_date.Year())
 
 	if err != nil {
