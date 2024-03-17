@@ -20,7 +20,7 @@ each item in the array has 2 properties :
 name: name of the hiliday in spanish
 date : date of the holiday in ISO format 
 
-Example request : api.diafestivo.co/all
+Example request : [api.diafestivo.co/all](https://api.diafestivo.co/all)
 
 **Response:**
 
@@ -47,7 +47,7 @@ Example request : api.diafestivo.co/all
 
 Returns an object with information about the next holiday in colombia that is not Sunday 
 
-Example request : api.diafestivo.co/next
+Example request : [api.diafestivo.co/next](https://api.diafestivo.co/next)
 
 **Response:**
 
@@ -66,7 +66,7 @@ Example request : api.diafestivo.co/next
 
 Make a GET request to "/is/{date}", where "{date}" represents a date you want to check if it is a colombian holiday in the format "YYYY-MM-DD". This endpoint supports only the current and next year.
 
-Example request : api.diafestivo.co/is/2025-05-20
+Example request : [api.diafestivo.co/is/2025-05-20](https://api.diafestivo.co/is/2025-05-20)
 
 **Response:**
 
