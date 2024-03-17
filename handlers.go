@@ -181,12 +181,15 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error parsing date"))
+		return
 	}
 
 	allHolidays, err := database.GetAllHolidays(redisClient, t.Year())
 
-	if err != nil {
-		panic(err)
+	if err != nil || t.Year() == 1 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("error parsing date"))
+		return 
 	}
 
 	for _, h := range *allHolidays {
