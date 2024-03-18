@@ -27,16 +27,12 @@ func GetAllHolidays(r *r.Client, year int) (*[]holiday.Holiday, error) {
 	ctx := context.Background()
 	redis_key := fmt.Sprintf("holidays:%v", year)
 
-	fmt.Println("Redis Key: ",redis_key)
-
 	err := r.Ping(ctx).Err()
 
 	if err != nil {
 		fmt.Println("BAD DB")
 		return nil, err
 	}
-
-	fmt.Println("OK DB")
 
 	holidaysJSON, err := r.Get(ctx, redis_key).Result()
 
