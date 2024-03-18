@@ -1,4 +1,4 @@
-name: Build image andPush to Google
+name: Build image and Push to Google
 
 on:
   push:
@@ -26,4 +26,4 @@ jobs:
 
     - name: Push Docker image to Google Container Registry
       run: |-
-        docker push us-east1-docker.pkg.dev/${{ secrets.GCP_PROJET }}/api/v1:latest
+        docker push us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/api/v1:latest
