@@ -26,4 +26,4 @@ jobs:
 
     - name: Push Docker image to Google Container Registry
       run: |-
-        docker push us-east1-docker.pkg.dev/${{ secrets.GCP_ID }}/api/v1:latest
+        docker push us-east1-docker.pkg.dev/${{ secrets.GCP_PROJET }}/api/v1:latest
