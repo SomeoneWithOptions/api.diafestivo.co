@@ -45,6 +45,21 @@ var months = map[int]string{
 	12: "Diciembre",
 }
 
+var englishMonths = map[int]string{
+	1:  "January",
+	2:  "February",
+	3:  "March",
+	4:  "April",
+	5:  "May",
+	6:  "June",
+	7:  "July",
+	8:  "August",
+	9:  "September",
+	10: "October",
+	11: "November",
+	12: "December",
+}
+
 var weekDays = map[int]string{
 	1: "Lunes",
 	2: "Martes",
@@ -53,6 +68,16 @@ var weekDays = map[int]string{
 	5: "Viernes",
 	6: "Sabado",
 	0: "Domingo",
+}
+
+var englishWeekDays= map[int]string{
+	1: "Monday",
+	2: "Tuesday",
+	3: "Wednesday",
+	4: "Thursday",
+	5: "Friday",
+	6: "Saturday",
+	0: "Sunday",
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
@@ -209,6 +234,36 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(g)
 }
+
+func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+
+	nh := GetNextHoliday()
+	t, _ := time.Parse(time.RFC3339, nh.Date)
+
+	t_info := templateinfo.NewTemplateInfo(
+		nh.Name,
+		nh.IsToday,
+		nh.DaysUntil,
+		nh.Date,
+		nil,
+		t.Day(),
+		englishMonths[int(t.Month())],
+		t.Year(),
+		englishWeekDays[int(t.Weekday())],
+	)
+
+	tmpl, err := template.ParseFiles("./en.html")
+
+	if err != nil {
+		panic("error parsing template")
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	tmpl.Execute(w, t_info)
+} 
 
 func logMessage(r *http.Request) {
 	var message string

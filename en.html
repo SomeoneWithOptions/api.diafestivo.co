@@ -1,0 +1,32 @@
+<p class="title-text yellow-accent">Is Today a Holiday in Colombia?</p>
+<p class="normal-text blue-accent">
+    {{if .IsToday}}YES! :){{else}}NO :({{end}}
+</p>
+{{if not .IsToday}}
+<p class="thin-text">Still
+    {{.DaysUntil}}
+    {{if gt .DaysUntil 1}} Days {{else}} Day {{end}}
+    Left
+</p>
+{{else}}{{end}}
+{{if not .IsToday}}
+<p class="thin-text">
+    The Next Holiday Will Be
+    {{.Weekday}} 
+    {{.Day}} of
+    {{.Month}} 
+    {{.Year}}</p>
+{{else}}{{end}}
+<p class="normal-text red-accent">
+    {{if .IsToday}}We Celebrate {{ .Name }}
+    {{else}}We Will Celebrate {{ .Name }}
+    {{end}}
+</p>
+{{if .IsToday}}
+<div class="gifContainer">
+    <img src="{{ .GifURL }}" alt="Celebrating GIF" class="gif">
+</div>
+{{else}}{{end}}
+{{if .IsToday}}
+<img src="./assets/giphyattributionmark.png" alt="Giphy Attribution Mark" class="giphy-attribution-mark">
+{{else}}{{end}}
