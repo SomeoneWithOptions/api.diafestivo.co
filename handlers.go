@@ -70,7 +70,7 @@ var weekDays = map[int]string{
 	0: "Domingo",
 }
 
-var englishWeekDays= map[int]string{
+var englishWeekDays = map[int]string{
 	1: "Monday",
 	2: "Tuesday",
 	3: "Wednesday",
@@ -214,7 +214,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil || t.Year() == 1 {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error parsing date"))
-		return 
+		return
 	}
 
 	for _, h := range *allHolidays {
@@ -223,14 +223,19 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 		if is {
 			res := IsHoliday{true}
 			g, _ := j.Marshal(res)
+			
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusOK)
 			w.Write(g)
 			return
 		}
 	}
-	
+
 	res := IsHoliday{false}
 	g, _ := j.Marshal(res)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write(g)
 }
@@ -263,7 +268,7 @@ func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	tmpl.Execute(w, t_info)
-} 
+}
 
 func logMessage(r *http.Request) {
 	var message string
