@@ -223,7 +223,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 		if is {
 			res := IsHoliday{true}
 			g, _ := j.Marshal(res)
-			
+
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.WriteHeader(http.StatusOK)
@@ -268,6 +268,17 @@ func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	tmpl.Execute(w, t_info)
+}
+
+func HandleClapRoute(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
+	cn, _ := strconv.Atoi(c)
+	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("👏"))
 }
 
 func logMessage(r *http.Request) {

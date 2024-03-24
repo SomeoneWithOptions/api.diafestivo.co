@@ -43,9 +43,10 @@ func main() {
 	http.HandleFunc("/all", HandleAllRoute)
 	http.HandleFunc("/next", HandleNextRoute)
 	http.HandleFunc("/template", HandleTemplateRoute)
-	http.HandleFunc("/", HandleInvalidRoute)
 	http.HandleFunc("/en", HandleEnglishRoute)
 	http.HandleFunc("GET /is/{id}", HandleIsRoute)
+	http.HandleFunc("GET /clap", HandleClapRoute)
+	http.HandleFunc("/", HandleInvalidRoute)
 
 	http.ListenAndServe(":"+PORT, nil)
 }
