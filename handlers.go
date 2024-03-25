@@ -243,15 +243,21 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 
+	var gif_url *string
+
 	nh := GetNextHoliday()
 	t, _ := time.Parse(time.RFC3339, nh.Date)
+
+	if nh.IsToday {
+		gif_url = giphy.GetGifURL()
+	}
 
 	t_info := templateinfo.NewTemplateInfo(
 		nh.Name,
 		nh.IsToday,
 		nh.DaysUntil,
 		nh.Date,
-		nil,
+		gif_url,
 		t.Day(),
 		englishMonths[int(t.Month())],
 		t.Year(),
