@@ -276,7 +276,7 @@ func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, t_info)
 }
 
-func HandleClapRoute(w http.ResponseWriter, r *http.Request) {
+func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
@@ -286,6 +286,16 @@ func HandleClapRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("👏"))
+}
+
+func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	defer r.Body.Close()
+	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(c))
 }
 
 func logMessage(r *http.Request) {
