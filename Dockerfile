@@ -9,5 +9,5 @@ WORKDIR /app
 COPY --from=build /app/api . 
 COPY /index.html .
 COPY /en.html .
-COPY . .
+
 CMD ["./api"]

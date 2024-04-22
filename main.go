@@ -27,8 +27,6 @@ func init() {
 	if err != nil {
 		fmt.Printf("error pinging DB: %v", err)
 	}
-
-	fmt.Println("Connected to Redis")
 }
 
 func main() {

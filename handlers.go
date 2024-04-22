@@ -278,7 +278,6 @@ func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 
 func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	cn, _ := strconv.Atoi(c)
 	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)
@@ -290,7 +289,6 @@ func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 
 func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
