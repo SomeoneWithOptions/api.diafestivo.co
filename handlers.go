@@ -297,35 +297,27 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func logMessage(r *http.Request) {
-	var message string
 	token := os.Getenv("IP_INFO_TOKEN")
 	ip := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
-	p := r.Header.Get("X-Forwarded-Proto")
+	p := r.Header.Get("X- Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
-	ip_info_client := ipinfo.NewClient(nil, nil, token)
-	info, err := ip_info_client.GetIPInfo(net.ParseIP(ip))
+
+	ipInfoClient := ipinfo.NewClient(nil, nil, token)
+	info, err := ipInfoClient.GetIPInfo(net.ParseIP(ip))
 
 	if err != nil {
-		message = fmt.Sprintf(
-			"\"%v\" %v %v %v %v %v %v\n",
-			r.URL, t.Format("02-01-2006:15:04:05"),
-			p,
-			ip,
-			"no IP info",
-			"",
-			"",
-		)
-	} else {
-		message = fmt.Sprintf(
-			"\"%v\" %v %v %v %v %v %v\n",
-			r.URL,
-			t.Format("02-01-2006:15:04:05"),
-			p,
-			ip,
-			info.City,
-			info.Region,
-			info.Country,
-		)
+		info = &ipinfo.Core{City: "NO IP INFO"}
 	}
+
+	message := fmt.Sprintf(
+		"\"%v\" %v %v %v %v %v  %v\n",
+		r.URL,
+		t.Format("02-01-2006:15:04:05"),
+		p,
+		ip,
+		info.City,
+		info.Region,
+		info.Country,
+	)
 	fmt.Printf("%v", message)
 }
