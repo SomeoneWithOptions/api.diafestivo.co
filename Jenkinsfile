@@ -20,6 +20,8 @@ pipeline{
         }
         steps{
             dir("api.diafestivo.co"){
+                sh "go mod download"
+                sh "go mod tidy"
                 sh "/usr/local/go/bin/go test -v ./..."
             }
         }
