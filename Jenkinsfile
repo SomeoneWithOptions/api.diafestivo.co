@@ -33,5 +33,11 @@ pipeline{
             sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build -o api"   
         }
     }
+
+    stage ('Build Docker Image'){
+        steps{
+            sh "docker build . -t api.diafestivo.co:latest"
+        }
+    }
    } 
 }
