@@ -2,7 +2,7 @@ pipeline{
    agent any
 
    stages {
-    stage('cleaunUp'){
+    stage('Clean Up'){
         steps {
            deleteDir()
         }
@@ -13,7 +13,7 @@ pipeline{
         }
     }
 
-    stage ("Test"){
+    stage ("Test Code"){
         environment {
             REDIS_DB = credentials('REDIS_DB')
             IP_INFO_TOKEN = credentials('IP_INFO_TOKEN')
