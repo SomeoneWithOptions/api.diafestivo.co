@@ -23,6 +23,7 @@ pipeline{
                 sh "/usr/local/go/bin/go mod download"
                 sh "/usr/local/go/bin/go mod tidy"
                 sh "/usr/local/go/bin/go test -v ./..."
+                sh "pwd"
             }
         }
     }
