@@ -2,10 +2,10 @@ pipeline{
    agent any
 
     parameters{
-            boolParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run tests?')
+            booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run tests?')
             chioce(name: 'AWS_REGION', choices: ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2'], description: 'Select AWS Region')
         }
-        
+
    stages {
     stage('Clean Up'){
         steps {
