@@ -41,7 +41,7 @@ pipeline{
         steps{
             dir("api.diafestivo.co"){
                 sh '''
-                docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=amd64 golang:1.22 go build -o myapp .
+                docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=amd64 golang:1.22 go build -o myapp -buildvcs=false .
                 '''
             }
           
