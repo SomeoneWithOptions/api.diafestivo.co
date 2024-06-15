@@ -39,15 +39,20 @@ pipeline{
 
     stage('Build Binary With docker'){
         steps{
-            sh '''
+            dir("api.diafestivo.co"){
+                sh '''
                 docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.22 go build -o myapp .
-            '''
+                '''
+            }
+          
         }
     }
 
     stage('Build Docker Image'){
         steps{
-            sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
+            dir("api.diafestivo.co"){
+             sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
+            }
         }
     }
 
