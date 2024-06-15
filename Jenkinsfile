@@ -1,12 +1,7 @@
 pipeline{
    agent any
 
-    parameters{
-            booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run tests?')
-            choice(name: 'AWS_REGION', choices: ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2'], description: 'Select AWS Region')
-        }
-
-   stages {
+    stages {
     stage('Clean Up'){
         steps {
            deleteDir()
@@ -28,11 +23,9 @@ pipeline{
             dir("api.diafestivo.co"){
                 sh "echo ${env.BUILD_NUMBER}"
                 sh '''
-                    env
                     export PATH=$PATH:/usr/local/go/bin
                     go mod download
                     go test -v ./...
-                    pwd
                 '''
             }
         }
@@ -40,8 +33,21 @@ pipeline{
 
     stage('Build Binary'){
         steps{
-            sh "env"
             sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build -o api"   
+        }
+    }
+
+    stage('Build Binary With docker'){
+        steps{
+            sh '''
+                docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp golang:1.22 go build -o myapp .
+            '''
+        }
+    }
+
+    stage('Build Docker Image'){
+        steps{
+            sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
         }
     }
 
