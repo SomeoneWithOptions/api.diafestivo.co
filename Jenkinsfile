@@ -40,6 +40,7 @@ pipeline{
     stage('Build Docker Image'){
         steps{
             sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
+        
         }
     }
 
