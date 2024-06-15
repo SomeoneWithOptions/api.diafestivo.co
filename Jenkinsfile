@@ -37,22 +37,9 @@ pipeline{
         }
     }
 
-    stage('Build Binary With docker'){
-        steps{
-            dir("api.diafestivo.co"){
-                sh '''
-                docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=amd64 golang:1.22 go build -o myapp -buildvcs=false .
-                '''
-            }
-          
-        }
-    }
-
     stage('Build Docker Image'){
         steps{
-            dir("api.diafestivo.co"){
-             sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
-            }
+            sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
         }
     }
 
