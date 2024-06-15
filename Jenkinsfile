@@ -27,6 +27,7 @@ pipeline{
         steps{
             dir("api.diafestivo.co"){
                 sh '''
+                    env
                     export PATH=$PATH:/usr/local/go/bin
                     go mod download
                     go test -v ./...
@@ -38,6 +39,7 @@ pipeline{
 
     stage('Build Binary'){
         steps{
+            sh "env"
             sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build -o api"   
         }
     }
