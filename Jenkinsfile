@@ -5,6 +5,11 @@ pipeline{
     stage('Clean Up'){
         steps {
            deleteDir()
+           sh '''
+            docker system prune -f 
+            docker rmi $(docker images -q)
+            docker system prune -f 
+           '''
         }
     }
     stage('Clone Repo'){
@@ -21,7 +26,6 @@ pipeline{
         }
         steps{
             dir("api.diafestivo.co"){
-                sh "echo ${env.BUILD_NUMBER}"
                 sh '''
                     export PATH=$PATH:/usr/local/go/bin
                     go mod download
@@ -31,16 +35,16 @@ pipeline{
         }
     }
 
-    stage('Build Binary'){
+    stage('Build Binaries'){
         steps{
-            sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build -o api"   
+            sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build -o apiAMD"   
+            sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 /usr/local/go/bin/go build -o apiARM"
         }
     }
 
     stage('Build Docker Image'){
         steps{
             sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
-        
         }
     }
 
