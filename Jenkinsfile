@@ -26,6 +26,7 @@ pipeline{
         }
         steps{
             dir("api.diafestivo.co"){
+                sh "echo ${env.BUILD_NUMBER}"
                 sh '''
                     env
                     export PATH=$PATH:/usr/local/go/bin
