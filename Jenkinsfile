@@ -11,7 +11,7 @@ pipeline{
            deleteDir()
            sh '''
             docker system prune -f 
-            docker rmi $(docker images -q)
+            docker rmi -f $(docker images -q)
             docker system prune -f 
            '''
         }
