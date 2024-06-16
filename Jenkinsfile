@@ -9,11 +9,15 @@ pipeline{
     stage('Clean Up'){
         steps {
            deleteDir()
-           sh '''
-            docker system prune -f 
-            docker rmi -f $(docker images -q)
-            docker system prune -f 
-           '''
+           script {
+                    def imageCount = sh(script: 'docker images -q 2> /dev/null | wc -l', returnStdout: true).trim()
+                    if (imageCount.toInteger() > 0) {
+                        sh 'docker system prune -f'
+                        sh 'docker rmi -f $(docker images -q)'
+                        sh 'docker system prune -f'
+                    } else {
+                        echo 'No images to remove.'
+                    }
         }
     }
     stage('Clone Repo'){
