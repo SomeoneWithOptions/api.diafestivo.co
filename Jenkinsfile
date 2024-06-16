@@ -1,6 +1,10 @@
 pipeline{
    agent any
 
+   environment{
+    AWS_CONTAINER = '745912973548.dkr.ecr.us-east-1.amazonaws.com'
+   }
+
     stages {
     stage('Clean Up'){
         steps {
@@ -35,16 +39,13 @@ pipeline{
         }
     }
 
-    stage('Build Binaries'){
-        steps{
-            sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build -o apiAMD"   
-            sh "cd api.diafestivo.co && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 /usr/local/go/bin/go build -o apiARM"
-        }
-    }
-
     stage('Build Docker Image'){
         steps{
-            sh "cd api.diafestivo.co && docker build -t api.diafestivo.co:${env.BUILD_NUMBER} ."
+            dir("api.diafestivo.co"){
+                sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${$AWS_CONTAINER}"
+                sh "docker build . -t ${$AWS_CONTAINER}/api-diafestivo:latest"
+                sh "docker push ${$AWS_CONTAINER}/api-diafestivo:latest"
+            }
         }
     }
 
