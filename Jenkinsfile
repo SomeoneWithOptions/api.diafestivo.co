@@ -20,6 +20,7 @@ pipeline{
                     }
         }
     }
+    }
     stage('Clone Repo'){
         steps{
             sh "git clone --branch deploy https://github.com/SomeoneWithOptions/api.diafestivo.co.git"
