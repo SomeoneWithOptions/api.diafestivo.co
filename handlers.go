@@ -106,7 +106,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next"}}
+	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next","/is/YYYY-MM-DD"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
