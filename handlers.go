@@ -106,7 +106,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next","/is/YYYY-MM-DD"}}
+	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next", "/is/YYYY-MM-DD"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -294,6 +294,38 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(c))
+}
+
+func LeftHandler(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+
+	tmpl, err := template.ParseFiles("./left.html")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	year := time.Now().Year()
+
+	all, err := database.GetAllHolidays(redisClient, year)
+	holiday.SortHolidaysArray(*all)
+	remaining := holiday.GetRemainingHolidaysInYear(all, year)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = tmpl.Execute(w, remaining)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 }
 
 func logMessage(r *http.Request) {
