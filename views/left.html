@@ -1,8 +1,10 @@
 <ul class="holiday_list">
-{{range .}}
-<li class="holiday">
-    <p class="holiday__name">{{ .Name }}</p>
-    <p class="holiday__date">{{ .Date }}</p>
-</li>
-{{end}}
+    {{range .}}
+    <li class="holiday">
+        <p class="holiday__day">{{ .Day }}</p>
+        <p class="holiday__month">{{ .Month }}</p>
+        <p class="holiday__name">{{ .Name }}</p>
+        <p class="holiday__days_left">en {{ .DaysLeft }} {{if gt .DaysLeft 1}} Días {{else}} Día {{end}}</p>
+    </li>
+    {{end}}
 </ul>

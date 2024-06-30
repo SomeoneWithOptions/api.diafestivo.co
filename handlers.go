@@ -298,6 +298,14 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 
 func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+
+	type LeftHolidays struct {
+		Name     string
+		Day      int
+		DaysLeft int
+		Month    time.Month
+	}
+
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -314,12 +322,24 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	holiday.SortHolidaysArray(*all)
 	remaining := holiday.GetRemainingHolidaysInYear(all, year)
 
+	data := []LeftHolidays{}
+
+	for _, h := range *remaining {
+		_, d := holiday.MakeDates(h)
+		data = append(data, LeftHolidays{
+			Name:     h.Name,
+			Day:      d.Day(),
+			DaysLeft: h.DaysUntil(),
+			Month:    d.Month(),
+		})
+	}
+
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	err = tmpl.Execute(w, remaining)
+	err = tmpl.Execute(w, data)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
