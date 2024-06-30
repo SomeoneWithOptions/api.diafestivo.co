@@ -303,7 +303,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		Name     string
 		Day      int
 		DaysLeft int
-		Month    time.Month
+		Month    string
 	}
 
 	w.Header().Set("Content-Type", "text/html")
@@ -330,7 +330,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 			Name:     h.Name,
 			Day:      d.Day(),
 			DaysLeft: h.DaysUntil(),
-			Month:    d.Month(),
+			Month:    months[int(d.Month())],
 		})
 	}
 
