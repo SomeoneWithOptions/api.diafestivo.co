@@ -44,12 +44,12 @@ pipeline{
         }
     }
 
-    stage('Build Docker Image'){
+    stage('Build and Upload to AWS'){
         steps{
             dir("api.diafestivo.co"){
                 sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_CONTAINER}"
-                sh "docker build . -t ${AWS_CONTAINER}/api-diafestivo:latest"
-                sh "docker push ${AWS_CONTAINER}/api-diafestivo:latest"
+                sh "docker build . -t ${AWS_CONTAINER}/api-diafestivo:${env.BRANCH_NAME}"
+                sh "docker push ${AWS_CONTAINER}/api-diafestivo:${env.BRANCH_NAME}"
             }
         }
     }
