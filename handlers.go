@@ -106,7 +106,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next","/is/YYYY-MM-DD"}}
+	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next", "/is/YYYY-MM-DD"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -140,7 +140,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 		weekDays[int(t.Weekday())],
 	)
 
-	tmpl, err := template.ParseFiles("./index.html")
+	tmpl, err := template.ParseFiles("./views/index.html")
 
 	if err != nil {
 		panic("error parsing template")
@@ -264,7 +264,7 @@ func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 		englishWeekDays[int(t.Weekday())],
 	)
 
-	tmpl, err := template.ParseFiles("./en.html")
+	tmpl, err := template.ParseFiles("./views/en.html")
 
 	if err != nil {
 		panic("error parsing template")
@@ -294,6 +294,38 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(c))
+}
+
+func LeftHandler(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+
+	tmpl, err := template.ParseFiles("./views/left.html")
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	year := time.Now().Year()
+
+	all, err := database.GetAllHolidays(redisClient, year)
+	holiday.SortHolidaysArray(*all)
+	remaining := holiday.GetRemainingHolidaysInYear(all, year)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = tmpl.Execute(w, remaining)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 }
 
 func logMessage(r *http.Request) {
