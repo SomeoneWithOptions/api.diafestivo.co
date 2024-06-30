@@ -140,7 +140,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 		weekDays[int(t.Weekday())],
 	)
 
-	tmpl, err := template.ParseFiles("./index.html")
+	tmpl, err := template.ParseFiles("./views/index.html")
 
 	if err != nil {
 		panic("error parsing template")
@@ -264,7 +264,7 @@ func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
 		englishWeekDays[int(t.Weekday())],
 	)
 
-	tmpl, err := template.ParseFiles("./en.html")
+	tmpl, err := template.ParseFiles("./views/en.html")
 
 	if err != nil {
 		panic("error parsing template")
@@ -302,7 +302,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
-	tmpl, err := template.ParseFiles("./left.html")
+	tmpl, err := template.ParseFiles("./views/left.html")
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return

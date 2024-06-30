@@ -6,8 +6,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o api
 
 FROM gcr.io/distroless/static-debian12
 WORKDIR /app
-COPY --from=build /app/api . 
-COPY /index.html .
-COPY /en.html .
-
-CMD ["./api"]
+COPY --from=build /app/api .
+COPY /views/ /app/views/
+CMD ["/app/api"]
