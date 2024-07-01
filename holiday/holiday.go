@@ -11,7 +11,7 @@ type NextHoliday struct {
 	Name      string `json:"name"`
 	Date      string `json:"date"`
 	IsToday   bool   `json:"isToday"`
-	DaysUntil int8   `json:"daysUntil"`
+	DaysUntil int    `json:"daysUntil"`
 }
 
 type Holiday struct {
@@ -19,7 +19,7 @@ type Holiday struct {
 	Date string `json:"date"`
 }
 
-func NewNextHoliday(name string, date string, is_today bool, days_until int8) NextHoliday {
+func NewNextHoliday(name string, date string, is_today bool, days_until int) NextHoliday {
 	var next_holiday NextHoliday
 	next_holiday.Name = name
 	next_holiday.Date = date
@@ -55,6 +55,19 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 	return nil
 }
 
+func GetRemainingHolidaysInYear(h *[]Holiday, year int) *[]Holiday {
+	var remainingHolidays []Holiday
+	today, _ := MakeDates(Holiday{})
+
+	for _, holiday := range *h {
+		_, holidayDate := MakeDates(holiday)
+		if holidayDate.After(today) {
+			remainingHolidays = append(remainingHolidays, holiday)
+		}
+	}
+	return &remainingHolidays
+}
+
 func (h Holiday) IsToday() bool {
 	currentDate, holidayDate := MakeDates(h)
 	return holidayDate.Year() == currentDate.Year() &&
@@ -62,10 +75,10 @@ func (h Holiday) IsToday() bool {
 		holidayDate.Day() == currentDate.Day()
 }
 
-func (h Holiday) DaysUntil() int8 {
+func (h Holiday) DaysUntil() int {
 	currentDate, holidayDate := MakeDates(h)
 	daysUntil := math.Ceil(holidayDate.Sub(currentDate).Hours() / 24)
-	return int8(daysUntil)
+	return int(daysUntil)
 }
 
 func MakeDates(h Holiday) (time.Time, time.Time) {

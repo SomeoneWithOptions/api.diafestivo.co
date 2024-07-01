@@ -45,4 +45,3 @@ func GetAllHolidays(r *r.Client, year int) (*[]holiday.Holiday, error) {
 
 	return &holidays, nil
 }
-
