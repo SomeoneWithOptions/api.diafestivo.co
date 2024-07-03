@@ -303,6 +303,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		Name     string
 		Day      int
 		DaysLeft int
+		WeekDay  string
 		Month    string
 	}
 
@@ -326,10 +327,12 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, h := range *remaining {
 		_, d := holiday.MakeDates(h)
+
 		data = append(data, LeftHolidays{
 			Name:     h.Name,
 			Day:      d.Day(),
 			DaysLeft: h.DaysUntil(),
+			WeekDay:  weekDays[int(d.Weekday())],
 			Month:    months[int(d.Month())],
 		})
 	}
