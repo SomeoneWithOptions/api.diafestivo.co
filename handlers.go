@@ -63,10 +63,10 @@ var englishMonths = map[int]string{
 var weekDays = map[int]string{
 	1: "Lunes",
 	2: "Martes",
-	3: "Miercoles",
+	3: "Míercoles",
 	4: "Jueves",
 	5: "Viernes",
-	6: "Sabado",
+	6: "Sábado",
 	0: "Domingo",
 }
 
