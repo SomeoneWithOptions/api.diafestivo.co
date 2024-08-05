@@ -352,8 +352,15 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logMessage(r *http.Request) {
+	defer r.Body.Close()
 	token := os.Getenv("IP_INFO_TOKEN")
 	ip := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
+	myIp := os.Getenv("MY_IP")
+
+	if ip == myIp {
+		return
+	}
+
 	p := r.Header.Get("X- Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 
