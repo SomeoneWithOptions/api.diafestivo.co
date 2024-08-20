@@ -45,21 +45,6 @@ var months = map[int]string{
 	12: "Diciembre",
 }
 
-var englishMonths = map[int]string{
-	1:  "January",
-	2:  "February",
-	3:  "March",
-	4:  "April",
-	5:  "May",
-	6:  "June",
-	7:  "July",
-	8:  "August",
-	9:  "September",
-	10: "October",
-	11: "November",
-	12: "December",
-}
-
 var weekDays = map[int]string{
 	1: "Lunes",
 	2: "Martes",
@@ -70,23 +55,15 @@ var weekDays = map[int]string{
 	0: "Domingo",
 }
 
-var englishWeekDays = map[int]string{
-	1: "Monday",
-	2: "Tuesday",
-	3: "Wednesday",
-	4: "Thursday",
-	5: "Friday",
-	6: "Saturday",
-	0: "Sunday",
-}
-
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	logMessage(r)
 	result, err := database.GetAllHolidaysAsJSON(redisClient)
 	if err != nil {
-		panic(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 	}
 
+	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -95,6 +72,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 	n := GetNextHoliday()
 	n_holiday_json, _ := j.Marshal(n)
 
@@ -106,6 +84,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next", "/is/YYYY-MM-DD"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
@@ -116,6 +95,7 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 	var gif_url *string
 	nh := GetNextHoliday()
 	t, err := time.Parse(time.RFC3339, nh.Date)
@@ -181,6 +161,7 @@ func GetNextHoliday() *holiday.NextHoliday {
 
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 
 	currentDate, _ := holiday.MakeDates(holiday.Holiday{})
 	inputDate := r.PathValue("id")
@@ -240,44 +221,9 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	w.Write(g)
 }
 
-func HandleEnglishRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
-
-	var gif_url *string
-
-	nh := GetNextHoliday()
-	t, _ := time.Parse(time.RFC3339, nh.Date)
-
-	if nh.IsToday {
-		gif_url = giphy.GetGifURL()
-	}
-
-	t_info := templateinfo.NewTemplateInfo(
-		nh.Name,
-		nh.IsToday,
-		nh.DaysUntil,
-		nh.Date,
-		gif_url,
-		t.Day(),
-		englishMonths[int(t.Month())],
-		t.Year(),
-		englishWeekDays[int(t.Weekday())],
-	)
-
-	tmpl, err := template.ParseFiles("./views/en.html")
-
-	if err != nil {
-		panic("error parsing template")
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	tmpl.Execute(w, t_info)
-}
-
 func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	cn, _ := strconv.Atoi(c)
 	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)
@@ -289,6 +235,7 @@ func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 
 func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -298,6 +245,7 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 
 func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	defer r.Body.Close()
 
 	type LeftHolidays struct {
 		Name     string
@@ -352,7 +300,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logMessage(r *http.Request) {
-	defer r.Body.Close()
+
 	token := os.Getenv("IP_INFO_TOKEN")
 	ip := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	myIp := os.Getenv("MY_IP")
@@ -361,7 +309,7 @@ func logMessage(r *http.Request) {
 		return
 	}
 
-	p := r.Header.Get("X- Forwarded-Proto")
+	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 
 	ipInfoClient := ipinfo.NewClient(nil, nil, token)

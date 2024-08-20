@@ -11,9 +11,9 @@ import (
 
 func GetAllHolidaysAsJSON(r *r.Client) (*string, error) {
 	ctx := context.Background()
-	c_date, _ := holiday.MakeDates(holiday.Holiday{})
+	now, _ := holiday.MakeDates(holiday.Holiday{})
 
-	redis_key := fmt.Sprintf("holidays:%v", c_date.Year())
+	redis_key := fmt.Sprintf("holidays:%v", now.Year())
 	holidays_json, err := r.Get(ctx, redis_key).Result()
 
 	if err != nil {
