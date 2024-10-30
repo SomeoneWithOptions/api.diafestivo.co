@@ -83,7 +83,6 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
 	defer r.Body.Close()
 	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next", "/is/YYYY-MM-DD"}}
 	invalidRouteResponse, _ := json.Marshal(m)
