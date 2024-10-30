@@ -30,7 +30,7 @@ func GetAllHolidays(r *r.Client, year int) (*[]holiday.Holiday, error) {
 	err := r.Ping(ctx).Err()
 
 	if err != nil {
-		fmt.Println("BAD DB")
+		fmt.Println("Cant Reach DB")
 		return nil, err
 	}
 
