@@ -267,6 +267,11 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	year := time.Now().Year()
 
 	all, err := database.GetAllHolidays(redisClient, year)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	holiday.SortHolidaysArray(*all)
 	remaining := holiday.GetRemainingHolidaysInYear(all, year)
 
@@ -282,11 +287,6 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 			WeekDay:  weekDays[int(d.Weekday())],
 			Month:    months[int(d.Month())],
 		})
-	}
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
 	}
 
 	err = tmpl.Execute(w, data)
