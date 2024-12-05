@@ -271,32 +271,27 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	
+
 	holiday.SortHolidaysArray(*all)
 	remaining := holiday.GetRemainingHolidaysInYear(all, year)
-	
-	fmt.Println(len(*remaining))
-	
+
 	if len(*remaining) <= 1 {
 		nextYear := year + 1
-		fmt.Println(year,nextYear)
 		allNextYear, err := database.GetAllHolidays(redisClient, nextYear)
+		holiday.SortHolidaysArray(*allNextYear)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		
-	for i, a := range *allNextYear {
-		if i== 3 {
-			break
+
+		for i, a := range *allNextYear {
+			if i == 3 {
+				break
+			}
+			*remaining = append(*remaining, a)
 		}
-		*remaining = append(*remaining, a)
 	}
-		fmt.Println(remaining)
-		
-	}
-	
-	
+
 	data := []LeftHolidays{}
 
 	for _, h := range *remaining {
