@@ -317,18 +317,22 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 func logMessage(r *http.Request) {
 
 	token := os.Getenv("IP_INFO_TOKEN")
-	ip := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
-	myIp := os.Getenv("MY_IP")
-
-	if ip == myIp {
-		return
+	clientIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
+	envIPs := os.Getenv("MY_IP")
+	
+	whiteListIPs := strings.Split(envIPs, ",")
+	
+	for _, i := range whiteListIPs {
+		if clientIP == i{
+			return
+		}
 	}
 
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 
 	ipInfoClient := ipinfo.NewClient(nil, nil, token)
-	info, err := ipInfoClient.GetIPInfo(net.ParseIP(ip))
+	info, err := ipInfoClient.GetIPInfo(net.ParseIP(clientIP))
 
 	if err != nil {
 		info = &ipinfo.Core{City: "NO IP INFO"}
@@ -339,7 +343,7 @@ func logMessage(r *http.Request) {
 		r.URL,
 		t.Format("02-01-2006:15:04:05"),
 		p,
-		ip,
+		clientIP,
 		info.City,
 		info.Region,
 		info.Country,
