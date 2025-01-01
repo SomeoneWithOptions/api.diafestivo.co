@@ -263,7 +263,8 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	year := time.Now().Year()
+	t ,_ := holiday.MakeDates(holiday.Holiday{})
+	year := t.Year()
 
 	all, err := database.GetAllHolidays(redisClient, year)
 	if err != nil {
