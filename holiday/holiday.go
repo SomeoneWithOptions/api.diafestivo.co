@@ -110,3 +110,11 @@ func ComputeEaster(year int) time.Time {
     day := ((h + l - 7*m + 114) % 31) + 1
     return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
+
+func MoveToMonday(t time.Time) time.Time {
+    if t.Weekday() != time.Monday {
+        days := (8 - int(t.Weekday())) % 7
+        t = t.AddDate(0, 0, days)
+    }
+    return t
+}
