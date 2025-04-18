@@ -14,11 +14,6 @@ type NextHoliday struct {
 	DaysUntil int    `json:"daysUntil"`
 }
 
-// type Holiday struct {
-// 	Name string `json:"name"`
-// 	Date string `json:"date"`
-// }
-
 type Holiday struct {
 	Date time.Time `json:"name"`
 	Name string    `json:"date"`

@@ -58,17 +58,14 @@ var weekDays = map[int]string{
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	logMessage(r)
-	result, err := database.GetAllHolidaysAsJSON(redisClient)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-	}
+	currentDate, _ := holiday.MakeDates(holiday.Holiday{})
+	h := holiday.MakeHolidaysByYear(currentDate.Year())
+	jsonResponse, _ := j.Marshal(h)
 
-	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(*result))
+	w.Write(jsonResponse)
 }
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
@@ -262,14 +259,14 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	year := t.Year()
 
 	// all, err := database.GetAllHolidays(redisClient, year)
-	
+
 	// if err != nil {
 	// 	w.Write([]byte(err.Error()))
 	// 	return
 	// }
 
 	// holiday.SortHolidaysArray(*all)
-	
+
 	all := holiday.MakeHolidaysByYear(year)
 	remaining := holiday.GetRemainingHolidaysInYear(all, year)
 
