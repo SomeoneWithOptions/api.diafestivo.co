@@ -69,18 +69,16 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
 	n := GetNextHoliday()
-	n_holiday_json, _ := j.Marshal(n)
+	jsonResponse, _ := j.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(n_holiday_json))
+	w.Write([]byte(jsonResponse))
 }
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next", "/is/YYYY-MM-DD"}}
 	invalidRouteResponse, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json")
@@ -91,27 +89,27 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
-	var gif_url *string
-	nh := GetNextHoliday()
 
-	if nh.IsToday {
-		gif_url = giphy.GetGifURL()
+	var gifURL *string
+	h := GetNextHoliday()
+
+	if h.IsToday {
+		gifURL = giphy.GetGifURL()
 	}
 
-	t_info := templateinfo.NewTemplateInfo(
-		nh.Name,
-		nh.IsToday,
-		nh.DaysUntil,
-		nh.Date,
-		gif_url,
-		nh.Date.Day(),
-		months[int(nh.Date.Month())],
-		nh.Date.Year(),
-		weekDays[int(nh.Date.Weekday())],
+	templateInfo := templateinfo.NewTemplateInfo(
+		h.Name,
+		h.IsToday,
+		h.DaysUntil,
+		h.Date,
+		gifURL,
+		h.Date.Day(),
+		months[int(h.Date.Month())],
+		h.Date.Year(),
+		weekDays[int(h.Date.Weekday())],
 	)
 
-	tmpl, err := template.ParseFiles("./views/index.html")
+	template, err := template.ParseFiles("./views/index.html")
 
 	if err != nil {
 		panic("error parsing template")
@@ -120,34 +118,33 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	tmpl.Execute(w, t_info)
+	template.Execute(w, templateInfo)
 }
 
 func GetNextHoliday() *holiday.NextHoliday {
-	c_date, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
+	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 
-	a_holidays := holiday.MakeHolidaysByYear(c_date.Year())
+	allHolidays := holiday.MakeHolidaysByYear(currentDate.Year())
 
-	n_holiday := a_holidays.FindNext()
+	nextHoliday := allHolidays.FindNext()
 
-	if n_holiday == nil {
-		next_year := c_date.Year() + 1
-		a_holidays := holiday.MakeHolidaysByYear(next_year)
-		n_holiday = a_holidays.FindNext()
+	if nextHoliday == nil {
+		nextYear := currentDate.Year() + 1
+		allHolidays := holiday.MakeHolidaysByYear(nextYear)
+		nextHoliday = allHolidays.FindNext()
 	}
 
 	n := holiday.NewNextHoliday(
-		n_holiday.Name,
-		n_holiday.Date,
-		n_holiday.IsToday(),
-		n_holiday.DaysUntil(),
+		nextHoliday.Name,
+		nextHoliday.Date,
+		nextHoliday.IsToday(),
+		nextHoliday.DaysUntil(),
 	)
 	return &n
 }
 
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
 
 	inputDate := r.PathValue("id")
 
@@ -193,7 +190,6 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 
 func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	cn, _ := strconv.Atoi(c)
 	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)
@@ -204,7 +200,6 @@ func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -214,7 +209,6 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 
 func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
 
 	type LeftHolidays struct {
 		Name     string
@@ -227,7 +221,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	tmpl, err := template.ParseFiles("./views/left.html")
+	template, err := template.ParseFiles("./views/left.html")
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
@@ -236,10 +230,10 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	year := t.Year()
 
-	all := holiday.MakeHolidaysByYear(year)
-	remaining := all.GetRemaining()
+	allHolidays := holiday.MakeHolidaysByYear(year)
+	remainingHolidays := allHolidays.GetRemaining()
 
-	if len(*remaining) <= 1 {
+	if len(*remainingHolidays) <= 1 {
 		nextYear := year + 1
 		allNextYear := holiday.MakeHolidaysByYear(nextYear)
 
@@ -247,16 +241,16 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 			if i == 3 {
 				break
 			}
-			*remaining = append(*remaining, a)
+			*remainingHolidays = append(*remainingHolidays, a)
 		}
 	}
 
-	data := []LeftHolidays{}
+	templateData := []LeftHolidays{}
 
-	for _, h := range *remaining {
+	for _, h := range *remainingHolidays {
 		_, d := holiday.MakeDatesInCOT(h)
 
-		data = append(data, LeftHolidays{
+		templateData = append(templateData, LeftHolidays{
 			Name:     h.Name,
 			Day:      d.Day(),
 			DaysLeft: h.DaysUntil(),
@@ -265,7 +259,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	err = tmpl.Execute(w, data)
+	err = template.Execute(w, templateData)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -276,11 +270,10 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 
 func MakeHandler(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	defer r.Body.Close()
+
 	queryParams := r.URL.Query()
 
 	yearInput := queryParams.Get("year")
-
 	year, err := strconv.Atoi(yearInput)
 
 	if err != nil {
