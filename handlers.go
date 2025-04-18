@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SomeoneWithOptions/api.diafestivo.co/database"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
@@ -126,19 +125,15 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 
 func GetNextHoliday() *holiday.NextHoliday {
 	c_date, _ := holiday.MakeDates(holiday.Holiday{})
-	a_holidays, err := database.GetAllHolidays(redisClient, c_date.Year())
-
-	if err != nil {
-		panic(err)
-	}
+	
+	a_holidays := holiday.MakeHolidaysByYear(c_date.Year())
 
 	holiday.SortHolidaysArray(*a_holidays)
 	var n_holiday = holiday.FindNextHoliday(*a_holidays)
 
 	if n_holiday == nil {
 		next_year := c_date.Year() + 1
-		a_holidays, _ = database.GetAllHolidays(redisClient, next_year)
-		holiday.SortHolidaysArray(*a_holidays)
+		a_holidays:= holiday.MakeHolidaysByYear(next_year)
 		n_holiday = holiday.FindNextHoliday(*a_holidays)
 	}
 
@@ -182,7 +177,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allHolidays, err := database.GetAllHolidays(redisClient, t.Year())
+	allHolidays := holiday.MakeHolidaysByYear(t.Year())
 
 	if err != nil || t.Year() == 1 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -258,26 +253,12 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	year := t.Year()
 
-	// all, err := database.GetAllHolidays(redisClient, year)
-
-	// if err != nil {
-	// 	w.Write([]byte(err.Error()))
-	// 	return
-	// }
-
-	// holiday.SortHolidaysArray(*all)
-
 	all := holiday.MakeHolidaysByYear(year)
 	remaining := holiday.GetRemainingHolidaysInYear(all, year)
 
 	if len(*remaining) <= 1 {
 		nextYear := year + 1
-		allNextYear, err := database.GetAllHolidays(redisClient, nextYear)
-		holiday.SortHolidaysArray(*allNextYear)
-		if err != nil {
-			w.Write([]byte(err.Error()))
-			return
-		}
+		allNextYear := holiday.MakeHolidaysByYear(nextYear)
 
 		for i, a := range *allNextYear {
 			if i == 3 {
