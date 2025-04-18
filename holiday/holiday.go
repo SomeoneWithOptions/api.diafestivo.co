@@ -136,7 +136,7 @@ func MakeHolidaysByYear(year int) *[]Holiday {
 		{time.Date(year, 7, 20, 0, 0, 0, 0, time.UTC), "el Día de la Independencia"},
 		{time.Date(year, 8, 7, 0, 0, 0, 0, time.UTC), "la Batalla de Boyacá"},
 		{MoveToMonday(time.Date(year, 8, 15, 0, 0, 0, 0, time.UTC)), "la Asunción de la Virgen"},
-		{MoveToMonday(time.Date(year, 10, 12, 0, 0, 0, 0, time.UTC)), "elDía de la Raza"},
+		{MoveToMonday(time.Date(year, 10, 12, 0, 0, 0, 0, time.UTC)), "el Día de la Raza"},
 		{MoveToMonday(time.Date(year, 11, 1, 0, 0, 0, 0, time.UTC)), "Todos los Santos"},
 		{MoveToMonday(time.Date(year, 11, 11, 0, 0, 0, 0, time.UTC)), "la Independencia de Cartagena"},
 		{time.Date(year, 12, 8, 0, 0, 0, 0, time.UTC), "la Inmaculada Concepción"},
