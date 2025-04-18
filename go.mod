@@ -1,6 +1,6 @@
 module github.com/SomeoneWithOptions/api.diafestivo.co
 
-go 1.22
+go 1.24
 
 require (
 	github.com/ipinfo/go/v2 v2.10.0
