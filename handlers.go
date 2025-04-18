@@ -98,11 +98,6 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var gif_url *string
 	nh := GetNextHoliday()
-	t, err := time.Parse(time.RFC3339, nh.Date)
-
-	if err != nil {
-		panic("error parsing date")
-	}
 
 	if nh.IsToday {
 		gif_url = giphy.GetGifURL()
@@ -114,10 +109,10 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 		nh.DaysUntil,
 		nh.Date,
 		gif_url,
-		t.Day(),
-		months[int(t.Month())],
-		t.Year(),
-		weekDays[int(t.Weekday())],
+		nh.Date.Day(),
+		months[int(nh.Date.Month())],
+		nh.Date.Year(),
+		weekDays[int(nh.Date.Weekday())],
 	)
 
 	tmpl, err := template.ParseFiles("./views/index.html")

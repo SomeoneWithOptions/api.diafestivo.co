@@ -9,7 +9,7 @@ import (
 
 type NextHoliday struct {
 	Name      string `json:"name"`
-	Date      string `json:"date"`
+	Date      time.Time `json:"date"`
 	IsToday   bool   `json:"isToday"`
 	DaysUntil int    `json:"daysUntil"`
 }
@@ -24,7 +24,7 @@ type Holiday struct {
 	Name string    `json:"date"`
 }
 
-func NewNextHoliday(name string, date string, is_today bool, days_until int) NextHoliday {
+func NewNextHoliday(name string, date time.Time, is_today bool, days_until int) NextHoliday {
 	var next_holiday NextHoliday
 	next_holiday.Name = name
 	next_holiday.Date = date

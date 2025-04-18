@@ -1,10 +1,12 @@
 package templateinfo
 
+import "time"
+
 type TemplateInfo struct {
 	IsToday   bool
 	Name      string
 	DaysUntil int
-	Date      string
+	Date      time.Time
 	GifURL    *string
 	Day       int
 	Month     string
@@ -12,7 +14,7 @@ type TemplateInfo struct {
 	Weekday   string
 }
 
-func NewTemplateInfo(name string, is_today bool, days_until int, date string, gif_url *string, day int, month string, year int, week_day string) TemplateInfo {
+func NewTemplateInfo(name string, is_today bool, days_until int, date time.Time, gif_url *string, day int, month string, year int, week_day string) TemplateInfo {
 	var template_info TemplateInfo
 	template_info.Name = name
 	template_info.IsToday = is_today
