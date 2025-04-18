@@ -85,10 +85,10 @@ func (h Holiday) DaysUntil() int {
 
 func MakeDates(h Holiday) (time.Time, time.Time) {
 	loc := time.FixedZone("UTC-5", -5*60*60)
-	hd, _ := time.Parse(time.RFC3339, h.Date)
-	holidayDate := hd.In(loc).Add(time.Hour * 5)
+	// hd, _ := time.Parse(time.RFC3339, h.Date)
+	// holidayDate := hd.In(loc).Add(time.Hour * 5)
 	currentDate := time.Now().In(loc)
-	return currentDate, holidayDate
+	return currentDate, h.Date
 }
 
 func IsSameDate(d1, d2 time.Time) bool {
