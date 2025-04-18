@@ -315,6 +315,32 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func  MakeHandler(w http.ResponseWriter, r *http.Request) {
+	go logMessage(r)
+	defer r.Body.Close()
+	queryParams := r.URL.Query()
+	
+	yearInput := queryParams.Get("year")
+
+	year, err := strconv.Atoi(yearInput)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("error parsing year"))
+		return
+	}
+	
+	fmt.Println(year)
+	
+	h := holiday.MakeHolidaysByYear(year)
+	json, _ := json.Marshal(h)
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
+}
+
 func logMessage(r *http.Request) {
 
 	token := os.Getenv("IP_INFO_TOKEN")
@@ -351,3 +377,4 @@ func logMessage(r *http.Request) {
 	)
 	fmt.Printf("%v", message)
 }
+
