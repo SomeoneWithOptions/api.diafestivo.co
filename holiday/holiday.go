@@ -19,6 +19,11 @@ type Holiday struct {
 	Date string `json:"date"`
 }
 
+type HolidayWithDate struct {
+	Date time.Time
+	Name string
+}
+
 func NewNextHoliday(name string, date string, is_today bool, days_until int) NextHoliday {
 	var next_holiday NextHoliday
 	next_holiday.Name = name
@@ -94,27 +99,54 @@ func IsSameDate(d1, d2 time.Time) bool {
 }
 
 func ComputeEaster(year int) time.Time {
-    a := year % 19
-    b := year / 100
-    c := year % 100
-    d := b / 4
-    e := b % 4
-    f := (b + 8) / 25
-    g := (b - f + 1) / 3
-    h := (19*a + b - d - g + 15) % 30
-    i := c / 4
-    k := c % 4
-    l := (32 + 2*e + 2*i - h - k) % 7
-    m := (a + 11*h + 22*l) / 451
-    month := (h + l - 7*m + 114) / 31
-    day := ((h + l - 7*m + 114) % 31) + 1
-    return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+	a := year % 19
+	b := year / 100
+	c := year % 100
+	d := b / 4
+	e := b % 4
+	f := (b + 8) / 25
+	g := (b - f + 1) / 3
+	h := (19*a + b - d - g + 15) % 30
+	i := c / 4
+	k := c % 4
+	l := (32 + 2*e + 2*i - h - k) % 7
+	m := (a + 11*h + 22*l) / 451
+	month := (h + l - 7*m + 114) / 31
+	day := ((h + l - 7*m + 114) % 31) + 1
+	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
 func MoveToMonday(t time.Time) time.Time {
-    if t.Weekday() != time.Monday {
-        days := (8 - int(t.Weekday())) % 7
-        t = t.AddDate(0, 0, days)
-    }
-    return t
+	if t.Weekday() != time.Monday {
+		days := (8 - int(t.Weekday())) % 7
+		t = t.AddDate(0, 0, days)
+	}
+	return t
+}
+
+func MakeHolidaysByYear(year int) []HolidayWithDate {
+	e := ComputeEaster(year)
+	h := []HolidayWithDate{
+		{time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), "Año Nuevo"},
+		{MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), "Día de los Reyes Magos"},
+		{MoveToMonday(time.Date(year, 3, 19, 0, 0, 0, 0, time.UTC)), "Día de San José"},
+		{e.AddDate(0, 0, -3), "Jueves Santo"},
+		{e.AddDate(0, 0, -2), "Viernes Santo"},
+		{time.Date(year, 5, 1, 0, 0, 0, 0, time.UTC), "Día del Trabajo"},
+		{MoveToMonday(e.AddDate(0, 0, 39)), "Ascensión del Señor"},
+		{MoveToMonday(e.AddDate(0, 0, 60)), "Corpus Christi"},
+		{MoveToMonday(e.AddDate(0, 0, 68)), "Sagrado Corazón de Jesús"},
+		{MoveToMonday(time.Date(year, 6, 29, 0, 0, 0, 0, time.UTC)), "San Pedro y San Pablo"},
+		{time.Date(year, 7, 20, 0, 0, 0, 0, time.UTC), "Día de la Independencia"},
+		{time.Date(year, 8, 7, 0, 0, 0, 0, time.UTC), "Batalla de Boyacá"},
+		{MoveToMonday(time.Date(year, 8, 15, 0, 0, 0, 0, time.UTC)), "Asunción de la Virgen"},
+		{MoveToMonday(time.Date(year, 10, 12, 0, 0, 0, 0, time.UTC)), "Día de la Raza"},
+		{MoveToMonday(time.Date(year, 11, 1, 0, 0, 0, 0, time.UTC)), "Todos los Santos"},
+		{MoveToMonday(time.Date(year, 11, 11, 0, 0, 0, 0, time.UTC)), "Independencia de Cartagena"},
+		{time.Date(year, 12, 8, 0, 0, 0, 0, time.UTC), "Inmaculada Concepción"},
+		{time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), "Navidad"},
+	}
+	sort.Slice(h, func(i, j int) bool { return h[i].Date.Before(h[j].Date) })
+
+	return h
 }
