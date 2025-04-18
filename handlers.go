@@ -256,7 +256,6 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
 
 	tmpl, err := template.ParseFiles("./views/left.html")
 	if err != nil {
