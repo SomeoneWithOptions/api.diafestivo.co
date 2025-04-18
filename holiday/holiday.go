@@ -58,12 +58,11 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 	return nil
 }
 
-func GetRemainingHolidaysInYear(h *[]HolidayWithDate, year int) *[]HolidayWithDate {
-	var remainingHolidays []HolidayWithDate
+func GetRemainingHolidaysInYear(h *[]Holiday, year int) *[]Holiday {
+	var remainingHolidays []Holiday
 	today, _ := MakeDates(Holiday{})
 
 	for _, holiday := range *h {
-		// _, holidayDate := MakeDates(holiday)
 		if holiday.Date.After(today) {
 			remainingHolidays = append(remainingHolidays, holiday)
 		}
