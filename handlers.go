@@ -150,17 +150,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	defer r.Body.Close()
 
-	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	inputDate := r.PathValue("id")
-	inputYear := strings.Split(inputDate, "-")[0]
-	inputYearasInt, _ := strconv.Atoi(inputYear)
-	nextYear := currentDate.Year() + 1
-
-	if !(inputYearasInt == currentDate.Year() || inputYearasInt == nextYear) {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("wrong year in request, use only this or next year"))
-		return
-	}
 
 	if len(inputDate) != 10 {
 		w.WriteHeader(http.StatusBadRequest)
