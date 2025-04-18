@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -263,7 +264,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t ,_ := holiday.MakeDates(holiday.Holiday{})
+	t, _ := holiday.MakeDates(holiday.Holiday{})
 	year := t.Year()
 
 	all, err := database.GetAllHolidays(redisClient, year)
@@ -315,11 +316,11 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func  MakeHandler(w http.ResponseWriter, r *http.Request) {
+func MakeHandler(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	defer r.Body.Close()
 	queryParams := r.URL.Query()
-	
+
 	yearInput := queryParams.Get("year")
 
 	year, err := strconv.Atoi(yearInput)
@@ -329,12 +330,10 @@ func  MakeHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("error parsing year"))
 		return
 	}
-	
-	fmt.Println(year)
-	
+
 	h := holiday.MakeHolidaysByYear(year)
 	json, _ := json.Marshal(h)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -346,13 +345,11 @@ func logMessage(r *http.Request) {
 	token := os.Getenv("IP_INFO_TOKEN")
 	clientIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	envIPs := os.Getenv("MY_IP")
-	
+
 	whiteListIPs := strings.Split(envIPs, ",")
-	
-	for _, i := range whiteListIPs {
-		if clientIP == i{
-			return
-		}
+
+	if slices.Contains(whiteListIPs, clientIP) {
+		return
 	}
 
 	p := r.Header.Get("X-Forwarded-Proto")
@@ -377,4 +374,3 @@ func logMessage(r *http.Request) {
 	)
 	fmt.Printf("%v", message)
 }
-
