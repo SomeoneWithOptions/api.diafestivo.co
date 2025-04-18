@@ -20,8 +20,8 @@ type Holiday struct {
 }
 
 type HolidayWithDate struct {
-	Date time.Time
-	Name string
+	Date time.Time `json:"name"`
+	Name string    `json:"date"`
 }
 
 func NewNextHoliday(name string, date string, is_today bool, days_until int) NextHoliday {
