@@ -75,7 +75,7 @@ func IsSunday(t time.Time) bool {
 func (h *Holidays) FilterSundays() *Holidays {
 	var filtered Holidays
 	for _, n := range *h {
-		if IsSunday(n.Date) {
+		if !IsSunday(n.Date) {
 			filtered = append(filtered, n)
 		}
 	}
