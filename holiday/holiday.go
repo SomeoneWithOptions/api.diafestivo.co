@@ -72,6 +72,16 @@ func IsSunday(t time.Time) bool {
 	return t.Weekday() == time.Sunday
 }
 
+func (h *Holidays) FilterSundays() *Holidays {
+	var filtered Holidays
+	for _, n := range *h {
+		if IsSunday(n.Date) {
+			filtered = append(filtered, n)
+		}
+	}
+	return &filtered
+}
+
 func ComputeEaster(year int) time.Time {
 	a := year % 19
 	b := year / 100
@@ -100,8 +110,7 @@ func MoveToMonday(t time.Time) time.Time {
 
 func MakeHolidaysByYear(year int) *Holidays {
 	e := ComputeEaster(year)
-	var m Holidays
-	h := []Holiday{
+	h := Holidays{
 		{time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), "Año Nuevo"},
 		{MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), "el Día de los Reyes Magos"},
 		{MoveToMonday(time.Date(year, 3, 19, 0, 0, 0, 0, time.UTC)), "el Día de San José"},
@@ -122,13 +131,9 @@ func MakeHolidaysByYear(year int) *Holidays {
 		{time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), "el Día de Navidad"},
 	}
 
-	for _, h := range h {
-		if IsSunday(h.Date) {
-			continue
-		}
-		m = append(m, h)
-	}
-	sort.Slice(h, func(i, j int) bool { return h[i].Date.Before(h[j].Date) })
+	m := h.FilterSundays()
 
-	return &m
+	m.Sort()
+
+	return m
 }
