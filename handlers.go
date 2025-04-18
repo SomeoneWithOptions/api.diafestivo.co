@@ -266,13 +266,16 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := holiday.MakeDates(holiday.Holiday{})
 	year := t.Year()
 
-	all, err := database.GetAllHolidays(redisClient, year)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
+	// all, err := database.GetAllHolidays(redisClient, year)
+	
+	// if err != nil {
+	// 	w.Write([]byte(err.Error()))
+	// 	return
+	// }
 
-	holiday.SortHolidaysArray(*all)
+	// holiday.SortHolidaysArray(*all)
+	
+	all := holiday.MakeHolidaysByYear(year)
 	remaining := holiday.GetRemainingHolidaysInYear(all, year)
 
 	if len(*remaining) <= 1 {

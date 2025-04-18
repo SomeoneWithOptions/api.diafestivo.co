@@ -14,12 +14,12 @@ type NextHoliday struct {
 	DaysUntil int    `json:"daysUntil"`
 }
 
-type Holiday struct {
-	Name string `json:"name"`
-	Date string `json:"date"`
-}
+// type Holiday struct {
+// 	Name string `json:"name"`
+// 	Date string `json:"date"`
+// }
 
-type HolidayWithDate struct {
+type Holiday struct {
 	Date time.Time `json:"name"`
 	Name string    `json:"date"`
 }
@@ -60,13 +60,13 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 	return nil
 }
 
-func GetRemainingHolidaysInYear(h *[]Holiday, year int) *[]Holiday {
-	var remainingHolidays []Holiday
+func GetRemainingHolidaysInYear(h *[]HolidayWithDate, year int) *[]HolidayWithDate {
+	var remainingHolidays []HolidayWithDate
 	today, _ := MakeDates(Holiday{})
 
 	for _, holiday := range *h {
-		_, holidayDate := MakeDates(holiday)
-		if holidayDate.After(today) {
+		// _, holidayDate := MakeDates(holiday)
+		if holiday.Date.After(today) {
 			remainingHolidays = append(remainingHolidays, holiday)
 		}
 	}
@@ -128,7 +128,7 @@ func MoveToMonday(t time.Time) time.Time {
 	return t
 }
 
-func MakeHolidaysByYear(year int) []HolidayWithDate {
+func MakeHolidaysByYear(year int) *[]HolidayWithDate {
 	e := ComputeEaster(year)
 	var m []HolidayWithDate
 	h := []HolidayWithDate{
@@ -160,5 +160,5 @@ func MakeHolidaysByYear(year int) []HolidayWithDate {
 	}
 	sort.Slice(h, func(i, j int) bool { return h[i].Date.Before(h[j].Date) })
 
-	return m
+	return &m
 }
