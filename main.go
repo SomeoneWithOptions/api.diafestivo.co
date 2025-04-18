@@ -43,6 +43,7 @@ func main() {
 	http.HandleFunc("POST /clap", AddClapsRoute)
 	http.HandleFunc("GET /clap", GetClapsRoute)
 	http.HandleFunc("GET /left", LeftHandler)
+	http.HandleFunc("GET /make", MakeHandler)
 	http.HandleFunc("/", HandleInvalidRoute)
 
 	http.ListenAndServe(":"+PORT, nil)
