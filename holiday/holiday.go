@@ -39,9 +39,7 @@ func (n NextHoliday) Print() string {
 
 func SortHolidaysArray(holidays []Holiday) {
 	sort.SliceStable(holidays, func(i, j int) bool {
-		dateI, _ := time.Parse(time.RFC3339, holidays[i].Date)
-		dateJ, _ := time.Parse(time.RFC3339, holidays[j].Date)
-		return dateI.Before(dateJ)
+		return holidays[i].Date.Before(holidays[j].Date)
 	})
 }
 
