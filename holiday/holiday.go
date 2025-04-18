@@ -39,9 +39,9 @@ func SortHolidaysArray(holidays []Holiday) {
 }
 
 func FindNextHoliday(holidays []Holiday) *Holiday {
-	current_time, _ := MakeDates(Holiday{})
+	current_time, _ := MakeDatesInCOT(Holiday{})
 	for _, h := range holidays {
-		_, holiday_date := MakeDates(h)
+		_, holiday_date := MakeDatesInCOT(h)
 
 		if h.IsToday() {
 			return &h
@@ -55,7 +55,7 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 
 func GetRemainingHolidaysInYear(h *[]Holiday, year int) *[]Holiday {
 	var remainingHolidays []Holiday
-	today, _ := MakeDates(Holiday{})
+	today, _ := MakeDatesInCOT(Holiday{})
 
 	for _, holiday := range *h {
 		if holiday.Date.After(today) {
@@ -66,24 +66,23 @@ func GetRemainingHolidaysInYear(h *[]Holiday, year int) *[]Holiday {
 }
 
 func (h Holiday) IsToday() bool {
-	currentDate, holidayDate := MakeDates(h)
+	currentDate, holidayDate := MakeDatesInCOT(h)
 	return holidayDate.Year() == currentDate.Year() &&
 		holidayDate.Month() == currentDate.Month() &&
 		holidayDate.Day() == currentDate.Day()
 }
 
 func (h Holiday) DaysUntil() int {
-	currentDate, holidayDate := MakeDates(h)
+	currentDate, holidayDate := MakeDatesInCOT(h)
 	daysUntil := math.Ceil(holidayDate.Sub(currentDate).Hours() / 24)
 	return int(daysUntil)
 }
 
-func MakeDates(h Holiday) (time.Time, time.Time) {
+func MakeDatesInCOT(h Holiday) (time.Time, time.Time) {
 	loc := time.FixedZone("UTC-5", -5*60*60)
-	// hd, _ := time.Parse(time.RFC3339, h.Date)
-	// holidayDate := hd.In(loc).Add(time.Hour * 5)
+	holidayDate := h.Date.In(loc).Add(time.Hour * 5)
 	currentDate := time.Now().In(loc)
-	return currentDate, h.Date
+	return currentDate, holidayDate
 }
 
 func IsSameDate(d1, d2 time.Time) bool {

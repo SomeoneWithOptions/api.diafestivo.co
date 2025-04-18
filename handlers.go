@@ -57,7 +57,7 @@ var weekDays = map[int]string{
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	logMessage(r)
-	currentDate, _ := holiday.MakeDates(holiday.Holiday{})
+	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	h := holiday.MakeHolidaysByYear(currentDate.Year())
 	jsonResponse, _ := j.Marshal(h)
 
@@ -124,7 +124,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetNextHoliday() *holiday.NextHoliday {
-	c_date, _ := holiday.MakeDates(holiday.Holiday{})
+	c_date, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	
 	a_holidays := holiday.MakeHolidaysByYear(c_date.Year())
 
@@ -150,7 +150,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	defer r.Body.Close()
 
-	currentDate, _ := holiday.MakeDates(holiday.Holiday{})
+	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	inputDate := r.PathValue("id")
 	inputYear := strings.Split(inputDate, "-")[0]
 	inputYearasInt, _ := strconv.Atoi(inputYear)
@@ -179,14 +179,8 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 
 	allHolidays := holiday.MakeHolidaysByYear(t.Year())
 
-	if err != nil || t.Year() == 1 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error parsing date"))
-		return
-	}
-
 	for _, h := range *allHolidays {
-		_, hDate := holiday.MakeDates(h)
+		_, hDate := holiday.MakeDatesInCOT(h)
 		is := holiday.IsSameDate(t, hDate)
 		if is {
 			res := IsHoliday{true}
@@ -250,7 +244,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, _ := holiday.MakeDates(holiday.Holiday{})
+	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	year := t.Year()
 
 	all := holiday.MakeHolidaysByYear(year)
@@ -271,7 +265,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	data := []LeftHolidays{}
 
 	for _, h := range *remaining {
-		_, d := holiday.MakeDates(h)
+		_, d := holiday.MakeDatesInCOT(h)
 
 		data = append(data, LeftHolidays{
 			Name:     h.Name,
@@ -328,7 +322,7 @@ func logMessage(r *http.Request) {
 	}
 
 	p := r.Header.Get("X-Forwarded-Proto")
-	t, _ := holiday.MakeDates(holiday.Holiday{})
+	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 
 	ipInfoClient := ipinfo.NewClient(nil, nil, token)
 	info, err := ipInfoClient.GetIPInfo(net.ParseIP(clientIP))
