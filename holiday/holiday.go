@@ -125,10 +125,10 @@ func MoveToMonday(t time.Time) time.Time {
 	return t
 }
 
-func MakeHolidaysByYear(year int) *[]HolidayWithDate {
+func MakeHolidaysByYear(year int) *[]Holiday {
 	e := ComputeEaster(year)
-	var m []HolidayWithDate
-	h := []HolidayWithDate{
+	var m []Holiday
+	h := []Holiday{
 		{time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), "Año Nuevo"},
 		{MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), "Día de los Reyes Magos"},
 		{MoveToMonday(time.Date(year, 3, 19, 0, 0, 0, 0, time.UTC)), "Día de San José"},
