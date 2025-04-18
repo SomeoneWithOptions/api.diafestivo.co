@@ -98,6 +98,10 @@ func IsSameDate(d1, d2 time.Time) bool {
 	return d1.Year() == d2.Year() && d1.Month() == d2.Month() && d1.Day() == d2.Day()
 }
 
+func IsSunday(t time.Time) bool {
+	return t.Weekday() == time.Sunday
+}
+
 func ComputeEaster(year int) time.Time {
 	a := year % 19
 	b := year / 100
@@ -126,6 +130,7 @@ func MoveToMonday(t time.Time) time.Time {
 
 func MakeHolidaysByYear(year int) []HolidayWithDate {
 	e := ComputeEaster(year)
+	var m []HolidayWithDate
 	h := []HolidayWithDate{
 		{time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), "Año Nuevo"},
 		{MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), "Día de los Reyes Magos"},
@@ -146,7 +151,14 @@ func MakeHolidaysByYear(year int) []HolidayWithDate {
 		{time.Date(year, 12, 8, 0, 0, 0, 0, time.UTC), "Inmaculada Concepción"},
 		{time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), "Navidad"},
 	}
+
+	for _, h := range h {
+		if IsSunday(h.Date) {
+			continue
+		}
+		m = append(m, h)
+	}
 	sort.Slice(h, func(i, j int) bool { return h[i].Date.Before(h[j].Date) })
 
-	return h
+	return m
 }
