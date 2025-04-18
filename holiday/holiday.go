@@ -11,15 +11,15 @@ func (n NextHoliday) Print() string {
 	return fmt.Sprintf("name: %s\ndate: %s\nisToday: %v\ndaysUntil: %d", n.Name, n.Date, n.IsToday, n.DaysUntil)
 }
 
-func SortHolidaysArray(holidays []Holiday) {
-	sort.SliceStable(holidays, func(i, j int) bool {
-		return holidays[i].Date.Before(holidays[j].Date)
+func (h Holidays) Sort() {
+	sort.SliceStable(h, func(i, j int) bool {
+		return h[i].Date.Before(h[j].Date)
 	})
 }
 
-func FindNextHoliday(holidays []Holiday) *Holiday {
+func (h *Holidays) FindNext() *Holiday {
 	current_time, _ := MakeDatesInCOT(Holiday{})
-	for _, h := range holidays {
+	for _, h := range *h {
 		_, holiday_date := MakeDatesInCOT(h)
 
 		if h.IsToday() {
@@ -32,8 +32,8 @@ func FindNextHoliday(holidays []Holiday) *Holiday {
 	return nil
 }
 
-func GetRemainingHolidaysInYear(h *[]Holiday, year int) *[]Holiday {
-	var remainingHolidays []Holiday
+func (h *Holidays) GetRemaining() *Holidays {
+	var remainingHolidays Holidays
 	today, _ := MakeDatesInCOT(Holiday{})
 
 	for _, holiday := range *h {
@@ -98,9 +98,9 @@ func MoveToMonday(t time.Time) time.Time {
 	return t
 }
 
-func MakeHolidaysByYear(year int) *[]Holiday {
+func MakeHolidaysByYear(year int) *Holidays {
 	e := ComputeEaster(year)
-	var m []Holiday
+	var m Holidays
 	h := []Holiday{
 		{time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), "Año Nuevo"},
 		{MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), "el Día de los Reyes Magos"},

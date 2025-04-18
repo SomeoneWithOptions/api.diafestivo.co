@@ -125,16 +125,15 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 
 func GetNextHoliday() *holiday.NextHoliday {
 	c_date, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
-	
+
 	a_holidays := holiday.MakeHolidaysByYear(c_date.Year())
 
-	holiday.SortHolidaysArray(*a_holidays)
-	var n_holiday = holiday.FindNextHoliday(*a_holidays)
+	n_holiday := a_holidays.FindNext()
 
 	if n_holiday == nil {
 		next_year := c_date.Year() + 1
-		a_holidays:= holiday.MakeHolidaysByYear(next_year)
-		n_holiday = holiday.FindNextHoliday(*a_holidays)
+		a_holidays := holiday.MakeHolidaysByYear(next_year)
+		n_holiday = a_holidays.FindNext()
 	}
 
 	n := holiday.NewNextHoliday(
@@ -238,7 +237,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	year := t.Year()
 
 	all := holiday.MakeHolidaysByYear(year)
-	remaining := holiday.GetRemainingHolidaysInYear(all, year)
+	remaining := all.GetRemaining()
 
 	if len(*remaining) <= 1 {
 		nextYear := year + 1
