@@ -131,9 +131,7 @@ func MakeHolidaysByYear(year int) *Holidays {
 		{time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), "el Día de Navidad"},
 	}
 
-	m := h.FilterSundays()
+	h.Sort()
 
-	m.Sort()
-
-	return m
+	return &h
 }

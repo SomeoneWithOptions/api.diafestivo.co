@@ -15,8 +15,8 @@ To use this API, send a GET request to the desired endpoint. the API responds wi
 
 ### `/all`
 
-Returns an array with all holidays for the year that are not sunday.
-each item in the array has 2 properties:
+Returns an array with all holidays for the year.
+Each item in the array has 2 properties:
 name: name of the hiliday in spanish
 date : date of the holiday in ISO format
 
@@ -48,7 +48,7 @@ date : date of the holiday in ISO format
 
 ### `/next`
 
-Returns an object with information about the next holiday in colombia that is not Sunday
+Returns an object with information about the next holiday in colombia that is NOT Sunday
 
 **Example:**
 

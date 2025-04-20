@@ -125,13 +125,15 @@ func GetNextHoliday() *holiday.NextHoliday {
 	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 
 	allHolidays := holiday.MakeHolidaysByYear(currentDate.Year())
+	filteredHolidays := allHolidays.FilterSundays()
 
-	nextHoliday := allHolidays.FindNext()
+	nextHoliday := filteredHolidays.FindNext()
 
 	if nextHoliday == nil {
 		nextYear := currentDate.Year() + 1
 		allHolidays := holiday.MakeHolidaysByYear(nextYear)
-		nextHoliday = allHolidays.FindNext()
+		filteredHolidays := allHolidays.FilterSundays()
+		nextHoliday = filteredHolidays.FindNext()
 	}
 
 	n := holiday.NewNextHoliday(
@@ -231,13 +233,15 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	year := t.Year()
 
 	allHolidays := holiday.MakeHolidaysByYear(year)
-	remainingHolidays := allHolidays.GetRemaining()
+	filteredHolidays := allHolidays.FilterSundays()
+	remainingHolidays := filteredHolidays.GetRemaining()
 
 	if len(*remainingHolidays) <= 1 {
 		nextYear := year + 1
 		allNextYear := holiday.MakeHolidaysByYear(nextYear)
+		filteredNextYear := allNextYear.FilterSundays()
 
-		for i, a := range *allNextYear {
+		for i, a := range *filteredNextYear {
 			if i == 3 {
 				break
 			}
