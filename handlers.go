@@ -192,6 +192,12 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 
 func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
+	origin := r.Header.Get("Origin")
+	if !strings.Contains(origin, "diafestivo.co") {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("origin not allowed"))
+		return
+	}
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	cn, _ := strconv.Atoi(c)
 	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)

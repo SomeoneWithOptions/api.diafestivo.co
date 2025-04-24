@@ -36,11 +36,11 @@ func main() {
 		PORT = "3002"
 	}
 
-	http.HandleFunc("/all", HandleAllRoute)
-	http.HandleFunc("/next", HandleNextRoute)
-	http.HandleFunc("/template", HandleTemplateRoute)
+	http.HandleFunc("GET /all", HandleAllRoute)
+	http.HandleFunc("GET /next", HandleNextRoute)
+	http.HandleFunc("GET /template", HandleTemplateRoute)
 	http.HandleFunc("GET /is/{id}", HandleIsRoute)
-	http.HandleFunc("POST /clap", AddClapsRoute)
+	http.HandleFunc("POST /clap", AllowedOriginMiddleware(AddClapsRoute))
 	http.HandleFunc("GET /clap", GetClapsRoute)
 	http.HandleFunc("GET /left", LeftHandler)
 	http.HandleFunc("GET /make", MakeHandler)
