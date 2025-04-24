@@ -202,6 +202,8 @@ func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
+	origin := r.Header.Get("Origin")
+	fmt.Println("ORIGIN:", origin)
 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
