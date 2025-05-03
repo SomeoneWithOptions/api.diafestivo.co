@@ -59,23 +59,27 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	logMessage(r)
 	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	h := holiday.MakeHolidaysByYear(currentDate.Year())
-	jsonResponse, _ := j.Marshal(h)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
+
+	err := json.NewEncoder(w).Encode(h)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	n := GetNextHoliday()
-	jsonResponse, _ := j.Marshal(n)
+	n := holiday.GetNextHoliday()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonResponse))
+
+	err := json.NewEncoder(w).Encode(n)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +95,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 
 	var gifURL *string
-	h := GetNextHoliday()
+	h := holiday.GetNextHoliday()
 
 	if h.IsToday {
 		gifURL = giphy.GetGifURL()
@@ -119,30 +123,6 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	template.Execute(w, templateInfo)
-}
-
-func GetNextHoliday() *holiday.NextHoliday {
-	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
-
-	allHolidays := holiday.MakeHolidaysByYear(currentDate.Year())
-	filteredHolidays := allHolidays.FilterSundays()
-
-	nextHoliday := filteredHolidays.FindNext()
-
-	if nextHoliday == nil {
-		nextYear := currentDate.Year() + 1
-		allHolidays := holiday.MakeHolidaysByYear(nextYear)
-		filteredHolidays := allHolidays.FilterSundays()
-		nextHoliday = filteredHolidays.FindNext()
-	}
-
-	n := holiday.NewNextHoliday(
-		nextHoliday.Name,
-		nextHoliday.Date,
-		nextHoliday.IsToday(),
-		nextHoliday.DaysUntil(),
-	)
-	return &n
 }
 
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {

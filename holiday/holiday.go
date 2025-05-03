@@ -72,6 +72,30 @@ func IsSunday(t time.Time) bool {
 	return t.Weekday() == time.Sunday
 }
 
+func GetNextHoliday() *NextHoliday {
+	currentDate, _ := MakeDatesInCOT(Holiday{})
+
+	allHolidays := MakeHolidaysByYear(currentDate.Year())
+	filteredHolidays := allHolidays.FilterSundays()
+
+	nextHoliday := filteredHolidays.FindNext()
+
+	if nextHoliday == nil {
+		nextYear := currentDate.Year() + 1
+		allHolidays := MakeHolidaysByYear(nextYear)
+		filteredHolidays := allHolidays.FilterSundays()
+		nextHoliday = filteredHolidays.FindNext()
+	}
+
+	n := NewNextHoliday(
+		nextHoliday.Name,
+		nextHoliday.Date,
+		nextHoliday.IsToday(),
+		nextHoliday.DaysUntil(),
+	)
+	return &n
+}
+
 func (h *Holidays) FilterSundays() *Holidays {
 	var filtered Holidays
 	for _, n := range *h {

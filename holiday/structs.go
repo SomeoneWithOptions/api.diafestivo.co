@@ -3,10 +3,10 @@ package holiday
 import "time"
 
 type NextHoliday struct {
-	Name      string `json:"name"`
+	Name      string    `json:"name"`
 	Date      time.Time `json:"date"`
-	IsToday   bool   `json:"isToday"`
-	DaysUntil int    `json:"daysUntil"`
+	IsToday   bool      `json:"isToday"`
+	DaysUntil int       `json:"daysUntil"`
 }
 
 type Holiday struct {
