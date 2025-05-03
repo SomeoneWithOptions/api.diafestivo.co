@@ -69,7 +69,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
-	n := GetNextHoliday()
+	n := holiday.GetNextHoliday()
 	jsonResponse, _ := j.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -91,7 +91,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 
 	var gifURL *string
-	h := GetNextHoliday()
+	h := holiday.GetNextHoliday()
 
 	if h.IsToday {
 		gifURL = giphy.GetGifURL()
@@ -119,30 +119,6 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	template.Execute(w, templateInfo)
-}
-
-func GetNextHoliday() *holiday.NextHoliday {
-	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
-
-	allHolidays := holiday.MakeHolidaysByYear(currentDate.Year())
-	filteredHolidays := allHolidays.FilterSundays()
-
-	nextHoliday := filteredHolidays.FindNext()
-
-	if nextHoliday == nil {
-		nextYear := currentDate.Year() + 1
-		allHolidays := holiday.MakeHolidaysByYear(nextYear)
-		filteredHolidays := allHolidays.FilterSundays()
-		nextHoliday = filteredHolidays.FindNext()
-	}
-
-	n := holiday.NewNextHoliday(
-		nextHoliday.Name,
-		nextHoliday.Date,
-		nextHoliday.IsToday(),
-		nextHoliday.DaysUntil(),
-	)
-	return &n
 }
 
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
