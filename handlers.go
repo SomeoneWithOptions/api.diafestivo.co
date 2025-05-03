@@ -59,12 +59,14 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	logMessage(r)
 	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	h := holiday.MakeHolidaysByYear(currentDate.Year())
-	jsonResponse, _ := j.Marshal(h)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
+
+	err := json.NewEncoder(w).Encode(h)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
