@@ -70,12 +70,14 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 	n := holiday.GetNextHoliday()
-	jsonResponse, _ := j.Marshal(n)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonResponse))
+
+	err := json.NewEncoder(w).Encode(n)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
