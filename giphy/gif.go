@@ -1,11 +1,10 @@
 package giphy
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
-
-	j "github.com/json-iterator/go"
 )
 
 func GetGifURL() *string {
@@ -17,7 +16,7 @@ func GetGifURL() *string {
 		panic("Error Making HTTP request")
 	}
 	defer res.Body.Close()
-	j.NewDecoder(res.Body).Decode(&gif)
+	json.NewDecoder(res.Body).Decode(&gif)
 
 	gif_url := gif.Data.Images.Original.URL
 	return &gif_url

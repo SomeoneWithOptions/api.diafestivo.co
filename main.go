@@ -39,7 +39,7 @@ func main() {
 	http.HandleFunc("GET /all", HandleAllRoute)
 	http.HandleFunc("GET /next", HandleNextRoute)
 	http.HandleFunc("GET /template", HandleTemplateRoute)
-	http.HandleFunc("GET /is/{id}", HandleIsRoute)
+	http.HandleFunc("GET /is/{date}", HandleIsRoute)
 	http.HandleFunc("POST /clap",AddClapsRoute)
 	http.HandleFunc("GET /clap", GetClapsRoute)
 	http.HandleFunc("GET /left", LeftHandler)
