@@ -268,12 +268,14 @@ func MakeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h := holiday.MakeHolidaysByYear(year)
-	json, _ := json.Marshal(h)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write(json)
+
+	err = json.NewEncoder(w).Encode(h)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func logMessage(r *http.Request) {
