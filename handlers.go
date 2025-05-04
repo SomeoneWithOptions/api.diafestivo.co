@@ -25,10 +25,6 @@ type InvalidRoute struct {
 	ValidRoutes []string `json:"valid_routes"`
 }
 
-type IsHoliday struct {
-	IsHoliday bool `json:"is_holiday"`
-}
-
 var months = map[int]string{
 	1:  "Enero",
 	2:  "Febrero",
