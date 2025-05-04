@@ -17,7 +17,6 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
 
 	"github.com/ipinfo/go/v2/ipinfo"
-	j "github.com/json-iterator/go"
 )
 
 type InvalidRoute struct {
