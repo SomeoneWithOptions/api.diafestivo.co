@@ -81,7 +81,7 @@ Make a GET request to "/is/{date}", where "{date}" represents a date you want to
 
 ```json
 {
-    "is_holiday": false
+    "isHoliday": false
 }
 ```
 
