@@ -123,18 +123,14 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	go logMessage(r)
 
-	inputDate := r.PathValue("id")
+	response := make(map[string]bool)
 
-	if len(inputDate) != 10 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("error parsing date"))
-		return
-	}
+	inputDate := r.PathValue("date")
 
 	layout := "2006-01-02"
 	t, err := time.Parse(layout, inputDate)
 
-	if err != nil {
+	if err != nil || len(inputDate) != 10 {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("error parsing date"))
 		return
@@ -144,25 +140,23 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 
 	for _, h := range *allHolidays {
 		_, hDate := holiday.MakeDatesInCOT(h)
-		is := holiday.IsSameDate(t, hDate)
-		if is {
-			res := IsHoliday{true}
-			g, _ := j.Marshal(res)
-
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.WriteHeader(http.StatusOK)
-			w.Write(g)
-			return
+		if holiday.IsSameDate(t, hDate) {
+			response["isHoliday"] = true
+			break
 		}
 	}
 
-	res := IsHoliday{false}
-	g, _ := j.Marshal(res)
+	if !response["isHoliday"] {
+		response["isHoliday"] = false
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write(g)
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
