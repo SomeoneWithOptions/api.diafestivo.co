@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-and-push-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -27,11 +27,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Check System Architecture
-        run: |
-          uname -a
-          docker info | grep Architecture
 
       - name: build and push for arm64
         env:
