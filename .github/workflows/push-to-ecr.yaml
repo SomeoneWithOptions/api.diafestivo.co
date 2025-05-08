@@ -11,13 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  build-and-push-architecture-specific:
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        architecture: ["amd64", "arm64"]
+  build-and-push-arm64:
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Checkout code
@@ -33,12 +28,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: build and push for amd64 and arm64
+      - name: build and push for arm64
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: api-diafestivo
-
-          ARCH: ${{ matrix.architecture }}
+          ARCH: amd64
         run: |
           docker build --platform linux/${ARCH} -t $REGISTRY/$REPOSITORY:$ARCH .
           docker push $REGISTRY/$REPOSITORY:$ARCH
@@ -67,5 +61,7 @@ jobs:
         run: |
           docker build --platform linux/amd64 -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:latest
+          docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:amd64
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:amd64
           docker push $REGISTRY/$REPOSITORY:latest
