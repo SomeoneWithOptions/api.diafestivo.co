@@ -10,8 +10,8 @@ type NextHoliday struct {
 }
 
 type Holiday struct {
-	Date time.Time `json:"name"`
-	Name string    `json:"date"`
+	Date time.Time `json:"date"`
+	Name string    `json:"name"`
 }
 
 type Holidays []Holiday
