@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"slices"
@@ -11,35 +12,30 @@ import (
 )
 
 func logMessage(r *http.Request) {
-
-	var clientIP IP
-	reqiestIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
+	requestIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	envIPs := os.Getenv("MY_IP")
 
 	whiteListIPs := strings.Split(envIPs, ",")
 
-	if slices.Contains(whiteListIPs, reqiestIP) {
+	if slices.Contains(whiteListIPs, requestIP) {
 		return
 	}
 
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 
-	ipinfo, err := IP(reqiestIP).FetchIPInfo()
+	ipinfo, err := IP(requestIP).FetchIPInfo()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	message := fmt.Sprintf(
-		"\"%v\" %v %v %v %v %v  %v\n",
+	log.Printf("[NOTICE]-\"%v\" %v %v %v %v %v  %v\n",
 		r.URL,
 		t.Format("02-01-2006:15:04:05"),
 		p,
-		clientIP,
+		ipinfo.IP,
 		ipinfo.City,
 		ipinfo.Region,
-		ipinfo.Country,
-	)
-	fmt.Printf("%v", message)
+		ipinfo.Country)
 }
