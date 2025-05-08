@@ -1,4 +1,4 @@
-FROM golang:bullseye AS build
+FROM golang:alpine AS build
 ARG TARGETARCH
 ARG TARGETOS
 WORKDIR /app/
