@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"net"
 	"net/http"
 	"os"
 	"slices"
@@ -15,8 +14,6 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
-
-	"github.com/ipinfo/go/v2/ipinfo"
 )
 
 type InvalidRoute struct {
@@ -280,24 +277,23 @@ func MakeHandler(w http.ResponseWriter, r *http.Request) {
 
 func logMessage(r *http.Request) {
 
-	token := os.Getenv("IP_INFO_TOKEN")
-	clientIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
+	var clientIP IP
+	reqiestIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	envIPs := os.Getenv("MY_IP")
 
 	whiteListIPs := strings.Split(envIPs, ",")
 
-	if slices.Contains(whiteListIPs, clientIP) {
+	if slices.Contains(whiteListIPs, reqiestIP) {
 		return
 	}
 
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 
-	ipInfoClient := ipinfo.NewClient(nil, nil, token)
-	info, err := ipInfoClient.GetIPInfo(net.ParseIP(clientIP))
-
+	ipinfo, err := IP(reqiestIP).FetchIPInfo()
 	if err != nil {
-		info = &ipinfo.Core{City: "NO IP INFO"}
+		fmt.Println(err)
+		return
 	}
 
 	message := fmt.Sprintf(
@@ -306,9 +302,9 @@ func logMessage(r *http.Request) {
 		t.Format("02-01-2006:15:04:05"),
 		p,
 		clientIP,
-		info.City,
-		info.Region,
-		info.Country,
+		ipinfo.City,
+		ipinfo.Region,
+		ipinfo.Country,
 	)
 	fmt.Printf("%v", message)
 }
