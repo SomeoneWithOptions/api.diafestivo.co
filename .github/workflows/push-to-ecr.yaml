@@ -39,7 +39,6 @@ jobs:
           REPOSITORY: api-diafestivo
         run: |
           docker build --platform linux/arm64 -t $REGISTRY/$REPOSITORY:arm64 .
-          docker inspect golang:bullseye | grep -i arch
           docker push $REGISTRY/$REPOSITORY:arm64
 
   build-and-push-latest:
