@@ -31,8 +31,8 @@ func logMessage(r *http.Request) {
 	}
 
 	log.Printf("[NOTICE] \"%v\" %v %v %v %v %v %v\n",
-		r.URL,
 		t.Format("02-01-2006:15:04:05"),
+		r.URL,
 		p,
 		ipinfo.IP,
 		ipinfo.City,
