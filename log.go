@@ -11,7 +11,7 @@ import (
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
-func logMessage(r *http.Request) {
+func logRequest(r *http.Request) {
 	requestIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
 	envIPs := os.Getenv("MY_IP")
 
@@ -24,7 +24,7 @@ func logMessage(r *http.Request) {
 	p := r.Header.Get("X-Forwarded-Proto")
 	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 
-	ipinfo, err := IP(requestIP).FetchIPInfo()
+	ipInfo, err := IP(requestIP).FetchIPInfo()
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -34,8 +34,8 @@ func logMessage(r *http.Request) {
 		t.Format("02-01-2006:15:04:05"),
 		r.URL,
 		p,
-		ipinfo.IP,
-		ipinfo.City,
-		ipinfo.Region,
-		ipinfo.Country)
+		ipInfo.IP,
+		ipInfo.City,
+		ipInfo.Region,
+		ipInfo.Country)
 }

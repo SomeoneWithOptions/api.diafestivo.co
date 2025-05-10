@@ -45,7 +45,7 @@ var weekDays = map[int]string{
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
-	logMessage(r)
+	logRequest(r)
 	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	h := holiday.MakeHolidaysByYear(currentDate.Year())
 
@@ -59,7 +59,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	go logRequest(r)
 	n := holiday.GetNextHoliday()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -81,7 +81,7 @@ func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	go logRequest(r)
 
 	var gifURL *string
 	h := holiday.GetNextHoliday()
@@ -115,7 +115,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	go logRequest(r)
 
 	response := make(map[string]bool)
 
@@ -154,7 +154,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	go logRequest(r)
 	origin := r.Header.Get("Origin")
 	if !strings.Contains(origin, "diafestivo.co") {
 		w.WriteHeader(http.StatusBadRequest)
@@ -185,7 +185,7 @@ func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func LeftHandler(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	go logRequest(r)
 
 	type LeftHolidays struct {
 		Name     string
@@ -248,7 +248,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MakeHandler(w http.ResponseWriter, r *http.Request) {
-	go logMessage(r)
+	go logRequest(r)
 
 	queryParams := r.URL.Query()
 
