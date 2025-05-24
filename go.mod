@@ -1,6 +1,6 @@
 module github.com/SomeoneWithOptions/api.diafestivo.co
 
-go 1.24
+go 1.24.3
 
 require github.com/redis/go-redis/v9 v9.1.0
 
