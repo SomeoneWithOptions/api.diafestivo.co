@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 )
@@ -70,4 +71,16 @@ func (ip IP) FetchIPInfoLite() (*IPInfoLite, error) {
 		return nil, err
 	}
 	return &ipinfo, nil
+}
+
+func (i IP) IsInCIDR(cidr string) (bool, error) {
+	parsedIP := net.ParseIP(string(i))
+	_, parsedNet, err := net.ParseCIDR(cidr)
+
+	if err != nil {
+		return false, err
+	}
+
+	return parsedNet.Contains(parsedIP), nil
+
 }
