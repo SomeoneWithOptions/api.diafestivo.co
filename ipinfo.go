@@ -80,7 +80,7 @@ func (i IP) IsInCIDR(cidr string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
+	
 	return parsedNet.Contains(parsedIP), nil
 
 }

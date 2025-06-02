@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
@@ -13,11 +12,9 @@ import (
 
 func logRequest(r *http.Request) {
 	requestIP := strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]
-	envIPs := os.Getenv("MY_IP")
+	envCIDR := os.Getenv("MY_CIDR")
 
-	whiteListIPs := strings.Split(envIPs, ",")
-
-	if slices.Contains(whiteListIPs, requestIP) {
+	if s, _ := IP(requestIP).IsInCIDR(envCIDR); s {
 		return
 	}
 
