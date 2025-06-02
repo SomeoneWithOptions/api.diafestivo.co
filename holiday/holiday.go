@@ -37,7 +37,8 @@ func (h *Holidays) GetRemaining() *Holidays {
 	today, _ := MakeDatesInCOT(Holiday{})
 
 	for _, holiday := range *h {
-		if holiday.Date.After(today) {
+		_, COTDate := MakeDatesInCOT(holiday)
+		if COTDate.After(today) {
 			remainingHolidays = append(remainingHolidays, holiday)
 		}
 	}
