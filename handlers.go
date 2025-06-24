@@ -208,15 +208,15 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	year := t.Year()
 
 	allHolidays := holiday.MakeHolidaysByYear(year)
-	filteredHolidays := allHolidays.FilterSundays()
-	remainingHolidays := filteredHolidays.GetRemaining()
+	// filteredHolidays := allHolidays.FilterSundays()
+	remainingHolidays := allHolidays.GetRemaining()
 
 	if len(*remainingHolidays) <= 1 {
 		nextYear := year + 1
 		allNextYear := holiday.MakeHolidaysByYear(nextYear)
-		filteredNextYear := allNextYear.FilterSundays()
+		// filteredNextYear := allNextYear.FilterSundays()
 
-		for i, a := range *filteredNextYear {
+		for i, a := range *allNextYear {
 			if i == 3 {
 				break
 			}
