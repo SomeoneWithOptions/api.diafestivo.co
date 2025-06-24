@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
-	"strings"
+	// "strings"
 	"time"
 
 	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
@@ -153,36 +153,36 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
-	go logRequest(r)
-	origin := r.Header.Get("Origin")
-	if !strings.Contains(origin, "diafestivo.co") {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("origin not allowed"))
-		return
-	}
-	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
-	cn, _ := strconv.Atoi(c)
-	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)
-	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("👏"))
-}
+// func AddClapsRoute(w http.ResponseWriter, r *http.Request) {
+// 	go logRequest(r)
+// 	origin := r.Header.Get("Origin")
+// 	if !strings.Contains(origin, "diafestivo.co") {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		w.Write([]byte("origin not allowed"))
+// 		return
+// 	}
+// 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
+// 	cn, _ := strconv.Atoi(c)
+// 	redisClient.Set(r.Context(), "diafestivo:claps", cn+1, 0)
+// 	w.Header().Set("Content-Type", "text/html")
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write([]byte("👏"))
+// }
 
-func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
-	origin := r.Header.Get("Origin")
-	if !strings.Contains(origin, "diafestivo.co") {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("origin not allowed"))
-		return
-	}
-	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
-	w.Header().Set("Content-Type", "text/html")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(c))
-}
+// func GetClapsRoute(w http.ResponseWriter, r *http.Request) {
+// 	origin := r.Header.Get("Origin")
+// 	if !strings.Contains(origin, "diafestivo.co") {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		w.Write([]byte("origin not allowed"))
+// 		return
+// 	}
+// 	c, _ := (redisClient.Get(r.Context(), "diafestivo:claps")).Result()
+// 	w.Header().Set("Content-Type", "text/html")
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write([]byte(c))
+// }
 
 func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	go logRequest(r)

@@ -1,34 +1,34 @@
 package main
 
 import (
-	"context"
-	"fmt"
+	// "context"
+	// "fmt"
 	"net/http"
 	"os"
 
-	r "github.com/redis/go-redis/v9"
+	// r "github.com/redis/go-redis/v9"
 )
 
-var redisClient *r.Client
+// var redisClient *r.Client
 
-func init() {
+// func init() {
 
-	opt, errParse := r.ParseURL(os.Getenv("REDIS_DB"))
-	if errParse != nil {
-		fmt.Printf("error parsing DB String: %v", errParse)
-	}
+// 	opt, errParse := r.ParseURL(os.Getenv("REDIS_DB"))
+// 	if errParse != nil {
+// 		fmt.Printf("error parsing DB String: %v", errParse)
+// 	}
 
-	redisClient = r.NewClient(opt)
+// 	redisClient = r.NewClient(opt)
 
-	err := redisClient.Ping(context.Background()).Err()
+// 	err := redisClient.Ping(context.Background()).Err()
 
-	if err != nil {
-		fmt.Printf("error pinging DB: %v", err)
-	}
-}
+// 	if err != nil {
+// 		fmt.Printf("error pinging DB: %v", err)
+// 	}
+// }
 
 func main() {
-	defer redisClient.Close()
+	// defer redisClient.Close()
 
 	PORT := os.Getenv("PORT")
 
@@ -40,8 +40,8 @@ func main() {
 	http.HandleFunc("GET /next", HandleNextRoute)
 	http.HandleFunc("GET /template", HandleTemplateRoute)
 	http.HandleFunc("GET /is/{date}", HandleIsRoute)
-	http.HandleFunc("POST /clap",AddClapsRoute)
-	http.HandleFunc("GET /clap", GetClapsRoute)
+	// http.HandleFunc("POST /clap",AddClapsRoute)
+	// http.HandleFunc("GET /clap", GetClapsRoute)
 	http.HandleFunc("GET /left", LeftHandler)
 	http.HandleFunc("GET /make", MakeHandler)
 	http.HandleFunc("/", HandleInvalidRoute)
