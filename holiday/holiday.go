@@ -75,16 +75,12 @@ func IsSunday(t time.Time) bool {
 
 func GetNextHoliday() *NextHoliday {
 	currentDate, _ := MakeDatesInCOT(Holiday{})
-
 	allHolidays := MakeHolidaysByYear(currentDate.Year())
-	// filteredHolidays := allHolidays.FilterSundays()
-
 	nextHoliday := allHolidays.FindNext()
 
 	if nextHoliday == nil {
 		nextYear := currentDate.Year() + 1
 		allHolidays := MakeHolidaysByYear(nextYear)
-		// filteredHolidays := allHolidays.FilterSundays()
 		nextHoliday = allHolidays.FindNext()
 	}
 
@@ -96,16 +92,6 @@ func GetNextHoliday() *NextHoliday {
 	)
 	return &n
 }
-
-// func (h *Holidays) FilterSundays() *Holidays {
-// 	var filtered Holidays
-// 	for _, n := range *h {
-// 		if !IsSunday(n.Date) {
-// 			filtered = append(filtered, n)
-// 		}
-// 	}
-// 	return &filtered
-// }
 
 func ComputeEaster(year int) time.Time {
 	a := year % 19
