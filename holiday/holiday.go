@@ -1,15 +1,10 @@
 package holiday
 
 import (
-	"fmt"
 	"math"
 	"sort"
 	"time"
 )
-
-func (n NextHoliday) Print() string {
-	return fmt.Sprintf("name: %s\ndate: %s\nisToday: %v\ndaysUntil: %d", n.Name, n.Date, n.IsToday, n.DaysUntil)
-}
 
 func (h Holidays) Sort() {
 	sort.SliceStable(h, func(i, j int) bool {
@@ -67,10 +62,6 @@ func MakeDatesInCOT(h Holiday) (time.Time, time.Time) {
 
 func IsSameDate(d1, d2 time.Time) bool {
 	return d1.Year() == d2.Year() && d1.Month() == d2.Month() && d1.Day() == d2.Day()
-}
-
-func IsSunday(t time.Time) bool {
-	return t.Weekday() == time.Sunday
 }
 
 func GetNextHoliday() *NextHoliday {
