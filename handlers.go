@@ -86,7 +86,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	h := holiday.GetNextHoliday()
 
 	if h.IsToday {
-		gifURL = giphy.GetGifURL()
+		gifURL = giphy.FetchGifURL()
 	}
 
 	templateInfo := templateinfo.NewTemplateInfo(
