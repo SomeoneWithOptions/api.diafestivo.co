@@ -35,9 +35,9 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           ARCH: "arm64"
         run: |
-          docker build --platform linux/${ARCH} -t $REGISTRY/$REPOSITORY:${IMAGE_TAG}-{ARCH} .
-          docker tag $REGISTRY/$REPOSITORY:${IMAGE_TAG}-{ARCH} $REGISTRY/$REPOSITORY:${ARCH}
-          docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG}-{ARCH}
+          docker build --platform linux/${ARCH} -t $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH} .
+          docker tag $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH} $REGISTRY/$REPOSITORY:${ARCH}
+          docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH}
           docker push $REGISTRY/$REPOSITORY:${ARCH}
 
   build-and-push-latest:
@@ -63,9 +63,9 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           ARCH: "amd64"
         run: |
-          docker build --platform linux/${ARCH} -t $REGISTRY/$REPOSITORY:${IMAGE_TAG}-{ARCH} .
-          docker tag $REGISTRY/$REPOSITORY:{IMAGE_TAG}-{ARCH} $REGISTRY/$REPOSITORY:${ARCH}
-          docker tag $REGISTRY/$REPOSITORY:{IMAGE_TAG}-{ARCH} $REGISTRY/$REPOSITORY:latest
-          docker push $REGISTRY/$REPOSITORY:{IMAGE_TAG}-{ARCH}
+          docker build --platform linux/${ARCH} -t $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH} .
+          docker tag $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH} $REGISTRY/$REPOSITORY:${ARCH}
+          docker tag $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH} $REGISTRY/$REPOSITORY:latest
+          docker push $REGISTRY/$REPOSITORY:${IMAGE_TAG}-${ARCH}
           docker push $REGISTRY/$REPOSITORY:${ARCH}
           docker push $REGISTRY/$REPOSITORY:latest
