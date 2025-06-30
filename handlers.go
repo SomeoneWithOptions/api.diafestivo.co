@@ -80,7 +80,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 
 func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	go logRequest(r)
-	n := holiday.GetNextHoliday()
+	n := holiday.FindUpcomingHoliday()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -95,7 +95,7 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 	go logRequest(r)
 
 	var gifURL *string
-	h := holiday.GetNextHoliday()
+	h := holiday.FindUpcomingHoliday()
 
 	if h.IsToday {
 		gifURL = giphy.FetchGifURL()
