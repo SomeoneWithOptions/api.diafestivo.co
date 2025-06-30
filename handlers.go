@@ -72,8 +72,8 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	err := json.NewEncoder(w).Encode(h)
-	if err != nil {
+	if err := json.NewEncoder(w).Encode(h); err != nil {
+		log.Printf("Failed to encode response: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
