@@ -65,7 +65,7 @@ func init() {
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
-	logRequest(r)
+	go logRequest(r)
 	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
 	h := holiday.MakeHolidaysByYear(currentDate.Year())
 
