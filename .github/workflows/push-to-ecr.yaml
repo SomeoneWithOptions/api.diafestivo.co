@@ -32,9 +32,12 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: api-diafestivo
+          IMAGE_TAG: ${{ github.sha }}
           ARCH: "arm64"
         run: |
-          docker build --platform linux/${ARCH} -t $REGISTRY/$REPOSITORY:${ARCH} .
+          docker build --platform linux/amd64 -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker tag $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:${ARCH} .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:${ARCH}
 
   build-and-push-latest:
