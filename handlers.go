@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,6 +18,8 @@ type InvalidRoute struct {
 	Message     string   `json:"message"`
 	ValidRoutes []string `json:"valid_routes"`
 }
+
+var invalidRouteResponse []byte
 
 var months = map[int]string{
 	1:  "Enero",
@@ -41,6 +44,24 @@ var weekDays = map[int]string{
 	5: "Viernes",
 	6: "Sábado",
 	0: "Domingo",
+}
+
+func init() {
+	m := InvalidRoute{
+		Status:  http.StatusBadRequest,
+		Message: "Please Use Valid Routes:",
+		ValidRoutes: []string{
+			"/all",
+			"/next",
+			"/is/YYYY-MM-DD",
+			"/make?year=YYYY",
+		},
+	}
+	var err error
+	invalidRouteResponse, err = json.Marshal(m)
+	if err != nil {
+		log.Fatalf("Failed to marshal invalid route response: %v", err)
+	}
 }
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
@@ -68,15 +89,6 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-}
-
-func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
-	m := InvalidRoute{400, "Please Use Valid Routes :", []string{"/all", "/next", "/is/YYYY-MM-DD", "/make?year=YYYY"}}
-	invalidRouteResponse, _ := json.Marshal(m)
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusBadRequest)
-	w.Write(invalidRouteResponse)
 }
 
 func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
@@ -236,4 +248,11 @@ func MakeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func HandleInvalidRoute(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write(invalidRouteResponse)
 }
