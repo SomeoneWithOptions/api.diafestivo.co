@@ -85,8 +85,7 @@ func HandleNextRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	err := json.NewEncoder(w).Encode(n)
-	if err != nil {
+	if err := json.NewEncoder(w).Encode(n); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -129,9 +128,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	go logRequest(r)
 
 	response := make(map[string]bool)
-
 	inputDate := r.PathValue("date")
-
 	layout := "2006-01-02"
 	t, err := time.Parse(layout, inputDate)
 
