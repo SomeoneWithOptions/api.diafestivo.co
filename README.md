@@ -48,7 +48,7 @@ date : date of the holiday in ISO format
 
 ### `/next`
 
-Returns an object with information about the next holiday in colombia that is NOT Sunday
+Returns an object with information about the next holiday in colombia
 
 **Example:**
 
