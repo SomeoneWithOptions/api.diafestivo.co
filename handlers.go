@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -187,12 +188,12 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	allHolidays := holiday.MakeHolidaysByYear(year)
 	remainingHolidays := allHolidays.GetRemaining()
 
-	if len(*remainingHolidays) <= 1 {
-		nextYear := year + 1
-		allNextYear := holiday.MakeHolidaysByYear(nextYear)
-
+	if len(*remainingHolidays) < 5 {
+		allNextYear := holiday.MakeHolidaysByYear(year + 1)
+		n := 5 - len(*remainingHolidays)
+		fmt.Println(n)
 		for i, a := range *allNextYear {
-			if i == 3 {
+			if i == n {
 				break
 			}
 			*remainingHolidays = append(*remainingHolidays, a)
