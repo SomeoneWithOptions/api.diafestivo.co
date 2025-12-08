@@ -187,7 +187,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	allHolidays := holiday.MakeHolidaysByYear(year)
 	remainingHolidays := allHolidays.GetRemaining()
 
-	if len(*remainingHolidays) < 5 {
+	if len(*remainingHolidays) < 3 {
 		allNextYear := holiday.MakeHolidaysByYear(year + 1)
 		n := 5 - len(*remainingHolidays)
 		for i, a := range *allNextYear {
