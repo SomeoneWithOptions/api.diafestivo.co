@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -27,12 +27,13 @@ func logRequest(r *http.Request) {
 		return
 	}
 
-	log.Printf("[NOTICE] \"%v\" %v %v %v %v %v %v\n",
-		t.Format("02-01-2006:15:04:05"),
-		r.URL,
-		p,
-		ipInfo.IP,
-		ipInfo.City,
-		ipInfo.Region,
-		ipInfo.Country)
+	slog.Info("request",
+		"time", t.Format("02-01-2006:15:04:05"),
+		"url", r.URL.String(),
+		"proto", p,
+		"ip", ipInfo.IP,
+		"city", ipInfo.City,
+		"region", ipInfo.Region,
+		"country", ipInfo.Country,
+	)
 }
