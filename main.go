@@ -1,11 +1,17 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 )
 
 func main() {
+	handlerOptions := &slog.HandlerOptions{Level: slog.LevelInfo}
+	stdoutHandler := slog.NewJSONHandler(os.Stdout, handlerOptions)
+	stderrHandler := slog.NewJSONHandler(os.Stderr, handlerOptions)
+	slog.SetDefault(slog.New(newSplitHandler(stdoutHandler, stderrHandler, slog.LevelError)))
+
 	PORT := os.Getenv("PORT")
 
 	if PORT == "" {
@@ -20,5 +26,7 @@ func main() {
 	http.HandleFunc("GET /make", MakeHandler)
 	http.HandleFunc("/", HandleInvalidRoute)
 
-	http.ListenAndServe(":"+PORT, nil)
+	if err := http.ListenAndServe(":"+PORT, nil); err != nil {
+		slog.Error("http server stopped", "error", err)
+	}
 }

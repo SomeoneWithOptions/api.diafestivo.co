@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -60,7 +61,8 @@ func init() {
 	var err error
 	invalidRouteResponse, err = json.Marshal(m)
 	if err != nil {
-		log.Fatalf("Failed to marshal invalid route response: %v", err)
+		slog.Error("failed to marshal invalid route response", "error", err)
+		os.Exit(1)
 	}
 }
 
@@ -73,7 +75,7 @@ func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	if err := json.NewEncoder(w).Encode(h); err != nil {
-		log.Printf("Failed to encode response: %v", err)
+		slog.Error("failed to encode all route response", "error", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -186,7 +188,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 
 	allHolidays := holiday.MakeHolidaysByYear(year)
 	remainingHolidays := allHolidays.GetRemaining()
-	
+
 	minDaystoShow := 3
 
 	if len(*remainingHolidays) < minDaystoShow {

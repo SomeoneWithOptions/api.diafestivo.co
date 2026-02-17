@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -23,7 +22,7 @@ func logRequest(r *http.Request) {
 
 	ipInfo, err := IP(requestIP).FetchIPInfo()
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("failed to fetch ip info", "error", err, "request_ip", requestIP)
 		return
 	}
 
