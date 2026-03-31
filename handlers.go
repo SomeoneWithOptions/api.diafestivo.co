@@ -22,6 +22,12 @@ type InvalidRoute struct {
 
 var invalidRouteResponse []byte
 
+// Pre-parsed templates — avoids disk I/O + parsing on every request.
+var (
+	indexTemplate = template.Must(template.ParseFiles("./views/index.html"))
+	leftTemplate  = template.Must(template.ParseFiles("./views/left.html"))
+)
+
 var months = map[int]string{
 	1:  "Enero",
 	2:  "Febrero",
@@ -68,8 +74,8 @@ func init() {
 
 func HandleAllRoute(w http.ResponseWriter, r *http.Request) {
 	go logRequest(r)
-	currentDate, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
-	h := holiday.MakeHolidaysByYear(currentDate.Year())
+	now := holiday.NowInCOT()
+	h := holiday.MakeHolidaysByYear(now.Year())
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -114,16 +120,10 @@ func HandleTemplateRoute(w http.ResponseWriter, r *http.Request) {
 		weekDays[int(h.Date.Weekday())],
 	)
 
-	template, err := template.ParseFiles("./views/index.html")
-
-	if err != nil {
-		panic("error parsing template")
-	}
-
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	template.Execute(w, templateInfo)
+	indexTemplate.Execute(w, templateInfo)
 }
 
 func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
@@ -143,7 +143,7 @@ func HandleIsRoute(w http.ResponseWriter, r *http.Request) {
 	allHolidays := holiday.MakeHolidaysByYear(t.Year())
 
 	for _, h := range *allHolidays {
-		_, hDate := holiday.MakeDatesInCOT(h)
+		hDate := holiday.HolidayDateInCOT(h)
 		if holiday.IsSameDate(t, hDate) {
 			response["isHoliday"] = true
 			break
@@ -177,14 +177,8 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	template, err := template.ParseFiles("./views/left.html")
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	t, _ := holiday.MakeDatesInCOT(holiday.Holiday{})
-	year := t.Year()
+	now := holiday.NowInCOT()
+	year := now.Year()
 
 	allHolidays := holiday.MakeHolidaysByYear(year)
 	remainingHolidays := allHolidays.GetRemaining()
@@ -205,7 +199,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 	templateData := []LeftHolidays{}
 
 	for _, h := range *remainingHolidays {
-		_, d := holiday.MakeDatesInCOT(h)
+		d := holiday.HolidayDateInCOT(h)
 
 		templateData = append(templateData, LeftHolidays{
 			Name:     h.Name,
@@ -216,7 +210,7 @@ func LeftHandler(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	err = template.Execute(w, templateData)
+	err := leftTemplate.Execute(w, templateData)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
