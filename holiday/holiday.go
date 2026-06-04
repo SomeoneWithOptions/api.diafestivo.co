@@ -153,6 +153,13 @@ func MakeHolidaysByYear(year int) *Holidays {
 		{time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), "el Día de Navidad"},
 	}
 
+	if year >= 2026 {
+		h = append(h, Holiday{
+			Date: MoveToMonday(time.Date(year, 7, 9, 0, 0, 0, 0, time.UTC)),
+			Name: "el Día de Nuestra Señora del Rosario de Chiquinquirá",
+		})
+	}
+
 	h.Sort()
 
 	holidayCache.Store(year, &h)
