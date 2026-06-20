@@ -75,18 +75,6 @@ curl -L 'https://api.diafestivo.co/make?year=2027'
 
 Invalid years return `400 Bad Request` with body `error parsing year`.
 
-### `GET /template`
-
-Returns an HTML fragment for the current/next holiday.
-
-### `GET /left`
-
-Returns an HTML fragment with remaining holidays.
-
-### `GET /healthz`
-
-Returns `ok` for health checks.
-
 ### Invalid routes
 
 Invalid routes return `400 Bad Request`:
