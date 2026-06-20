@@ -1,12 +1,26 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"net"
+	"io"
 	"net/http"
+	"net/netip"
+	"net/url"
 	"os"
+	"time"
 )
+
+const maxIPInfoResponseBytes = 1 << 20
+
+var (
+	ErrMissingIPInfoToken = errors.New("missing IP_INFO_TOKEN")
+	ErrInvalidIP          = errors.New("invalid ip address")
+)
+
+var ipInfoHTTPClient = &http.Client{Timeout: 3 * time.Second}
 
 type IPInfo struct {
 	IP       string `json:"ip,omitempty"`
@@ -22,9 +36,9 @@ type IPInfo struct {
 
 type IPInfoLite struct {
 	IP            string `json:"ip,omitempty"`
-	Asn           string `json:"asn,omitempty"`
-	AsName        string `json:"as_name,omitempty"`
-	AsDomain      string `json:"as_domain,omitempty"`
+	ASN           string `json:"asn,omitempty"`
+	ASName        string `json:"as_name,omitempty"`
+	ASDomain      string `json:"as_domain,omitempty"`
 	CountryCode   string `json:"country_code,omitempty"`
 	Country       string `json:"country,omitempty"`
 	ContinentCode string `json:"continent_code,omitempty"`
@@ -38,49 +52,83 @@ func (ip IP) String() string {
 }
 
 func (ip IP) FetchIPInfo() (*IPInfo, error) {
-	var ipinfo IPInfo
-	token := os.Getenv("IP_INFO_TOKEN")
-	url := fmt.Sprintf("https://ipinfo.io/%s/json?token=%s", ip, token)
+	return ip.FetchIPInfoContext(context.Background())
+}
 
-	r, err := http.Get(url)
-	if err != nil {
+func (ip IP) FetchIPInfoContext(ctx context.Context) (*IPInfo, error) {
+	var ipInfo IPInfo
+	if err := fetchIPInfo(ctx, "ipinfo.io", "", ip.String(), &ipInfo); err != nil {
 		return nil, err
 	}
-	defer r.Body.Close()
-
-	err = json.NewDecoder(r.Body).Decode(&ipinfo)
-	if err != nil {
-		return nil, err
-	}
-	return &ipinfo, nil
+	return &ipInfo, nil
 }
 
 func (ip IP) FetchIPInfoLite() (*IPInfoLite, error) {
-	var ipinfo IPInfoLite
-	token := os.Getenv("IP_INFO_TOKEN")
-	url := fmt.Sprintf("https://api.ipinfo.io/lite/%s/json?token=%s", ip, token)
-
-	r, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Body.Close()
-
-	err = json.NewDecoder(r.Body).Decode(&ipinfo)
-	if err != nil {
-		return nil, err
-	}
-	return &ipinfo, nil
+	return ip.FetchIPInfoLiteContext(context.Background())
 }
 
-func (i IP) IsInCIDR(cidr string) (bool, error) {
-	parsedIP := net.ParseIP(string(i))
-	_, parsedNet, err := net.ParseCIDR(cidr)
+func (ip IP) FetchIPInfoLiteContext(ctx context.Context) (*IPInfoLite, error) {
+	var ipInfo IPInfoLite
+	if err := fetchIPInfo(ctx, "api.ipinfo.io", "/lite", ip.String(), &ipInfo); err != nil {
+		return nil, err
+	}
+	return &ipInfo, nil
+}
 
+func fetchIPInfo(ctx context.Context, host, basePath, ip string, target any) error {
+	if _, err := netip.ParseAddr(ip); err != nil {
+		return fmt.Errorf("%w: %q", ErrInvalidIP, ip)
+	}
+
+	token := os.Getenv("IP_INFO_TOKEN")
+	if token == "" {
+		return ErrMissingIPInfoToken
+	}
+
+	requestURL := url.URL{
+		Scheme: "https",
+		Host:   host,
+		Path:   basePath + "/" + ip + "/json",
+	}
+	query := requestURL.Query()
+	query.Set("token", token)
+	requestURL.RawQuery = query.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestURL.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	res, err := ipInfoHTTPClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
+		return fmt.Errorf("ipinfo returned status %d", res.StatusCode)
+	}
+
+	if err := json.NewDecoder(io.LimitReader(res.Body, maxIPInfoResponseBytes)).Decode(target); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ip IP) IsInCIDR(cidr string) (bool, error) {
+	if cidr == "" {
+		return false, nil
+	}
+
+	addr, err := netip.ParseAddr(ip.String())
+	if err != nil {
+		return false, fmt.Errorf("%w: %q", ErrInvalidIP, ip.String())
+	}
+
+	prefix, err := netip.ParsePrefix(cidr)
 	if err != nil {
 		return false, err
 	}
-	
-	return parsedNet.Contains(parsedIP), nil
 
+	return prefix.Contains(addr), nil
 }
