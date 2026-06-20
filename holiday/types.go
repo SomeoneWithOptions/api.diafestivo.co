@@ -16,18 +16,10 @@ type Holiday struct {
 
 type Holidays []Holiday
 
-func NewNextHoliday(name string, date time.Time, is_today bool, days_until int) NextHoliday {
-	var next_holiday NextHoliday
-	next_holiday.Name = name
-	next_holiday.Date = date
-	next_holiday.IsToday = is_today
-	next_holiday.DaysUntil = days_until
-	return next_holiday
+func NewNextHoliday(name string, date time.Time, isToday bool, daysUntil int) NextHoliday {
+	return NextHoliday{Name: name, Date: date, IsToday: isToday, DaysUntil: daysUntil}
 }
 
 func NewHoliday(date time.Time, name string) Holiday {
-	var h Holiday
-	h.Date = date
-	h.Name = name
-	return h
+	return Holiday{Date: date, Name: name}
 }

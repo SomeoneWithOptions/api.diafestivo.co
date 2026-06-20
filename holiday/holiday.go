@@ -2,7 +2,7 @@ package holiday
 
 import (
 	"math"
-	"sort"
+	"slices"
 	"sync"
 	"time"
 )
@@ -10,24 +10,27 @@ import (
 // Package-level timezone avoids recreating it on every call.
 var cotLocation = time.FixedZone("UTC-5", -5*60*60)
 
+// nowFunc is a test seam. Production uses time.Now.
+var nowFunc = time.Now
+
 // Cache computed holidays per year. Holidays are deterministic
 // for a given year, so this never needs invalidation.
 var holidayCache sync.Map
 
 func (h Holidays) Sort() {
-	sort.SliceStable(h, func(i, j int) bool {
-		return h[i].Date.Before(h[j].Date)
+	slices.SortStableFunc(h, func(a, b Holiday) int {
+		return a.Date.Compare(b.Date)
 	})
 }
 
 func (h *Holidays) FindNext() *Holiday {
 	now := NowInCOT()
 	for _, holiday := range *h {
-		hDate := HolidayDateInCOT(holiday)
-		if IsSameDate(now, hDate) {
+		holidayDate := HolidayDateInCOT(holiday)
+		if IsSameDate(now, holidayDate) {
 			return &holiday
 		}
-		if hDate.After(now) {
+		if holidayDate.After(now) {
 			return &holiday
 		}
 	}
@@ -35,12 +38,12 @@ func (h *Holidays) FindNext() *Holiday {
 }
 
 func (h *Holidays) GetRemaining() *Holidays {
-	var remainingHolidays Holidays
+	remainingHolidays := Holidays{}
 	now := NowInCOT()
 
 	for _, holiday := range *h {
-		hDate := HolidayDateInCOT(holiday)
-		if hDate.After(now) {
+		holidayDate := HolidayDateInCOT(holiday)
+		if holidayDate.After(now) {
 			remainingHolidays = append(remainingHolidays, holiday)
 		}
 	}
@@ -49,25 +52,37 @@ func (h *Holidays) GetRemaining() *Holidays {
 
 func (h Holiday) IsToday() bool {
 	now := NowInCOT()
-	hDate := HolidayDateInCOT(h)
-	return IsSameDate(now, hDate)
+	holidayDate := HolidayDateInCOT(h)
+	return IsSameDate(now, holidayDate)
 }
 
 func (h Holiday) DaysUntil() int {
 	now := NowInCOT()
-	hDate := HolidayDateInCOT(h)
-	daysUntil := math.Ceil(hDate.Sub(now).Hours() / 24)
+	holidayDate := HolidayDateInCOT(h)
+	daysUntil := math.Ceil(holidayDate.Sub(now).Hours() / 24)
 	return int(daysUntil)
+}
+
+// SetNowFuncForTest replaces the package clock and returns a restore function.
+// It is intended for tests.
+func SetNowFuncForTest(fn func() time.Time) func() {
+	previousNowFunc := nowFunc
+	if fn == nil {
+		nowFunc = time.Now
+	} else {
+		nowFunc = fn
+	}
+	return func() { nowFunc = previousNowFunc }
 }
 
 // NowInCOT returns the current time in Colombia timezone.
 func NowInCOT() time.Time {
-	return time.Now().In(cotLocation)
+	return nowFunc().In(cotLocation)
 }
 
-// HolidayDateInCOT converts a holiday's UTC date to Colombia timezone.
+// HolidayDateInCOT returns a holiday's civil date at midnight in Colombia timezone.
 func HolidayDateInCOT(h Holiday) time.Time {
-	return h.Date.In(cotLocation).Add(time.Hour * 5)
+	return time.Date(h.Date.Year(), h.Date.Month(), h.Date.Day(), 0, 0, 0, 0, cotLocation)
 }
 
 // MakeDatesInCOT returns (currentTime, holidayDate) in COT.
@@ -82,21 +97,21 @@ func IsSameDate(d1, d2 time.Time) bool {
 
 func FindUpcomingHoliday() *NextHoliday {
 	now := NowInCOT()
-	allHolidays := MakeHolidaysByYear(now.Year())
-	nextHoliday := allHolidays.FindNext()
+	holidays := MakeHolidaysByYear(now.Year())
+	nextHoliday := holidays.FindNext()
 
 	if nextHoliday == nil {
-		allHolidays = MakeHolidaysByYear(now.Year() + 1)
-		nextHoliday = allHolidays.FindNext()
+		holidays = MakeHolidaysByYear(now.Year() + 1)
+		nextHoliday = holidays.FindNext()
 	}
 
-	n := NewNextHoliday(
+	result := NewNextHoliday(
 		nextHoliday.Name,
 		nextHoliday.Date,
 		nextHoliday.IsToday(),
 		nextHoliday.DaysUntil(),
 	)
-	return &n
+	return &result
 }
 
 func ComputeEaster(year int) time.Time {
@@ -126,42 +141,43 @@ func MoveToMonday(t time.Time) time.Time {
 }
 
 func MakeHolidaysByYear(year int) *Holidays {
-	// Check cache first.
 	if cached, ok := holidayCache.Load(year); ok {
-		return cached.(*Holidays)
+		cachedHolidays := cached.(Holidays)
+		clonedHolidays := slices.Clone(cachedHolidays)
+		return &clonedHolidays
 	}
 
-	e := ComputeEaster(year)
-	h := Holidays{
-		{time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), "Año Nuevo"},
-		{MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), "el Día de los Reyes Magos"},
-		{MoveToMonday(time.Date(year, 3, 19, 0, 0, 0, 0, time.UTC)), "el Día de San José"},
-		{e.AddDate(0, 0, -3), "Jueves Santo"},
-		{e.AddDate(0, 0, -2), "Viernes Santo"},
-		{time.Date(year, 5, 1, 0, 0, 0, 0, time.UTC), "el Día del Trabajo"},
-		{MoveToMonday(e.AddDate(0, 0, 39)), "la Ascensión del Señor"},
-		{MoveToMonday(e.AddDate(0, 0, 60)), "Corpus Christi"},
-		{MoveToMonday(e.AddDate(0, 0, 68)), "el Sagrado Corazón de Jesús"},
-		{MoveToMonday(time.Date(year, 6, 29, 0, 0, 0, 0, time.UTC)), "San Pedro y San Pablo"},
-		{time.Date(year, 7, 20, 0, 0, 0, 0, time.UTC), "el Día de la Independencia"},
-		{time.Date(year, 8, 7, 0, 0, 0, 0, time.UTC), "la Batalla de Boyacá"},
-		{MoveToMonday(time.Date(year, 8, 15, 0, 0, 0, 0, time.UTC)), "la Asunción de la Virgen"},
-		{MoveToMonday(time.Date(year, 10, 12, 0, 0, 0, 0, time.UTC)), "el Día de la Raza"},
-		{MoveToMonday(time.Date(year, 11, 1, 0, 0, 0, 0, time.UTC)), "Todos los Santos"},
-		{MoveToMonday(time.Date(year, 11, 11, 0, 0, 0, 0, time.UTC)), "la Independencia de Cartagena"},
-		{time.Date(year, 12, 8, 0, 0, 0, 0, time.UTC), "la Inmaculada Concepción"},
-		{time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), "el Día de Navidad"},
+	easter := ComputeEaster(year)
+	holidays := Holidays{
+		{Date: time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), Name: "Año Nuevo"},
+		{Date: MoveToMonday(time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)), Name: "el Día de los Reyes Magos"},
+		{Date: MoveToMonday(time.Date(year, 3, 19, 0, 0, 0, 0, time.UTC)), Name: "el Día de San José"},
+		{Date: easter.AddDate(0, 0, -3), Name: "Jueves Santo"},
+		{Date: easter.AddDate(0, 0, -2), Name: "Viernes Santo"},
+		{Date: time.Date(year, 5, 1, 0, 0, 0, 0, time.UTC), Name: "el Día del Trabajo"},
+		{Date: MoveToMonday(easter.AddDate(0, 0, 39)), Name: "la Ascensión del Señor"},
+		{Date: MoveToMonday(easter.AddDate(0, 0, 60)), Name: "Corpus Christi"},
+		{Date: MoveToMonday(easter.AddDate(0, 0, 68)), Name: "el Sagrado Corazón de Jesús"},
+		{Date: MoveToMonday(time.Date(year, 6, 29, 0, 0, 0, 0, time.UTC)), Name: "San Pedro y San Pablo"},
+		{Date: time.Date(year, 7, 20, 0, 0, 0, 0, time.UTC), Name: "el Día de la Independencia"},
+		{Date: time.Date(year, 8, 7, 0, 0, 0, 0, time.UTC), Name: "la Batalla de Boyacá"},
+		{Date: MoveToMonday(time.Date(year, 8, 15, 0, 0, 0, 0, time.UTC)), Name: "la Asunción de la Virgen"},
+		{Date: MoveToMonday(time.Date(year, 10, 12, 0, 0, 0, 0, time.UTC)), Name: "el Día de la Raza"},
+		{Date: MoveToMonday(time.Date(year, 11, 1, 0, 0, 0, 0, time.UTC)), Name: "Todos los Santos"},
+		{Date: MoveToMonday(time.Date(year, 11, 11, 0, 0, 0, 0, time.UTC)), Name: "la Independencia de Cartagena"},
+		{Date: time.Date(year, 12, 8, 0, 0, 0, 0, time.UTC), Name: "la Inmaculada Concepción"},
+		{Date: time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), Name: "el Día de Navidad"},
 	}
 
 	if year >= 2026 {
-		h = append(h, Holiday{
+		holidays = append(holidays, Holiday{
 			Date: MoveToMonday(time.Date(year, 7, 9, 0, 0, 0, 0, time.UTC)),
 			Name: "el Día de Nuestra Señora del Rosario de Chiquinquirá",
 		})
 	}
 
-	h.Sort()
-
-	holidayCache.Store(year, &h)
-	return &h
+	holidays.Sort()
+	canonicalHolidays := slices.Clone(holidays)
+	holidayCache.Store(year, canonicalHolidays)
+	return &holidays
 }
