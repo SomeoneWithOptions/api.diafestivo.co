@@ -29,12 +29,12 @@
     {{end}}
 </p>
 
-{{if .IsToday}}
+{{if and .IsToday .GifURL}}
 <div class="gifContainer">
     <img src="{{ .GifURL }}" alt="Celebrating GIF" class="gif">
 </div>
 {{else}}{{end}}
 
-{{if .IsToday}}
+{{if and .IsToday .GifURL}}
 <img src="./assets/giphyattributionmark.png" alt="Giphy Attribution Mark" class="giphy-attribution-mark">
 {{else}}{{end}}
