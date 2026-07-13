@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SomeoneWithOptions/api.diafestivo.co/giphy"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
 )
@@ -20,7 +19,7 @@ func handleTemplate(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 
 		var err error
-		gifURL, err = giphy.FetchGifURLContext(ctx)
+		gifURL, err = fetchGifURLContext(ctx)
 		if err != nil {
 			slog.Error("failed to fetch giphy gif", "error", err)
 		}

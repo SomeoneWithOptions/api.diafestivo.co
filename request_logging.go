@@ -94,7 +94,7 @@ func logRequest(ctx context.Context, data requestLogData, cfg config) {
 	}
 
 	if cfg.myCIDR != "" {
-		isOwnIP, err := IP(data.requestIP).IsInCIDR(cfg.myCIDR)
+		isOwnIP, err := isInCIDR(data.requestIP, cfg.myCIDR)
 		if err != nil {
 			invalidCIDRLogOnce.Do(func() {
 				slog.Error("invalid MY_CIDR", "cidr", cfg.myCIDR, "error", err)
@@ -109,7 +109,7 @@ func logRequest(ctx context.Context, data requestLogData, cfg config) {
 		return
 	}
 
-	ipInfo, err := IP(requestAddr.String()).FetchIPInfoContext(ctx)
+	ipInfo, err := fetchIPInfoContext(ctx, requestAddr.String())
 	if err != nil {
 		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
 			slog.Error("failed to fetch ip info", "error", err, "request_ip", data.requestIP)
