@@ -3,7 +3,6 @@
 .gitignore
 Dockerfile
 README.md
-GO_BEST_PRACTICES_PLAN.md
 *.test
 coverage.out
 tmp
