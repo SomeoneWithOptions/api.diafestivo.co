@@ -1,4 +1,4 @@
-package holiday
+package main
 
 import (
 	"testing"
@@ -7,23 +7,29 @@ import (
 
 func TestMakeHolidaysByYearKnownDates(t *testing.T) {
 	tests := []struct {
-		name string
-		year int
-		want map[string]string
+		name      string
+		year      int
+		wantCount int
+		want      map[string]string
 	}{
 		{
-			name: "fixed monday shifted and easter derived holidays",
-			year: 2025,
+			name:      "fixed monday shifted and easter derived holidays",
+			year:      2025,
+			wantCount: 18,
 			want: map[string]string{
 				"Año Nuevo":                     "2025-01-01",
 				"el Día de los Reyes Magos":     "2025-01-06",
 				"el Día de San José":            "2025-03-24",
 				"Jueves Santo":                  "2025-04-17",
 				"Viernes Santo":                 "2025-04-18",
+				"el Día del Trabajo":            "2025-05-01",
 				"la Ascensión del Señor":        "2025-06-02",
 				"Corpus Christi":                "2025-06-23",
 				"el Sagrado Corazón de Jesús":   "2025-06-30",
 				"el Día de la Independencia":    "2025-07-20",
+				"la Batalla de Boyacá":          "2025-08-07",
+				"el Día de la Raza":             "2025-10-13",
+				"Todos los Santos":              "2025-11-03",
 				"la Inmaculada Concepción":      "2025-12-08",
 				"el Día de Navidad":             "2025-12-25",
 				"la Independencia de Cartagena": "2025-11-17",
@@ -33,8 +39,9 @@ func TestMakeHolidaysByYearKnownDates(t *testing.T) {
 			},
 		},
 		{
-			name: "chiquinquira holiday starts in 2026",
-			year: 2026,
+			name:      "chiquinquira holiday starts in 2026",
+			year:      2026,
+			wantCount: 19,
 			want: map[string]string{
 				"Jueves Santo":                "2026-04-02",
 				"Viernes Santo":               "2026-04-03",
@@ -49,8 +56,11 @@ func TestMakeHolidaysByYearKnownDates(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			holidays := MakeHolidaysByYear(tt.year)
+			if len(holidays) != tt.wantCount {
+				t.Fatalf("holiday count = %d, want %d", len(holidays), tt.wantCount)
+			}
 			byName := map[string]string{}
-			for _, holiday := range *holidays {
+			for _, holiday := range holidays {
 				byName[holiday.Name] = HolidayDateInCOT(holiday).Format(time.DateOnly)
 			}
 
@@ -70,17 +80,6 @@ func TestMakeHolidaysByYearKnownDates(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestMakeHolidaysByYearReturnsClone(t *testing.T) {
-	holidayList := MakeHolidaysByYear(2027)
-	originalName := (*holidayList)[0].Name
-	(*holidayList)[0].Name = "corrupted"
-
-	freshHolidayList := MakeHolidaysByYear(2027)
-	if got := (*freshHolidayList)[0].Name; got != originalName {
-		t.Fatalf("cache was mutated: got %q, want %q", got, originalName)
 	}
 }
 
@@ -107,7 +106,7 @@ func TestClockDependentHolidayMethods(t *testing.T) {
 	}
 
 	remainingHolidays := holidays.GetRemaining()
-	if len(*remainingHolidays) == 0 || (*remainingHolidays)[0].Name != "Corpus Christi" {
+	if len(remainingHolidays) == 0 || remainingHolidays[0].Name != "Corpus Christi" {
 		t.Fatalf("first remaining holiday = %#v, want Corpus Christi", remainingHolidays)
 	}
 }
@@ -119,10 +118,10 @@ func TestGetRemainingExcludesToday(t *testing.T) {
 
 	holidays := MakeHolidaysByYear(2025)
 	remainingHolidays := holidays.GetRemaining()
-	if len(*remainingHolidays) == 0 {
+	if len(remainingHolidays) == 0 {
 		t.Fatal("expected remaining holidays")
 	}
-	if got := (*remainingHolidays)[0].Name; got == "Corpus Christi" {
+	if got := remainingHolidays[0].Name; got == "Corpus Christi" {
 		t.Fatalf("today's holiday should be excluded from /left semantics, got %q", got)
 	}
 }

@@ -3,13 +3,31 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
+	"time"
 )
+
+const defaultPort = "3002"
+
+type config struct {
+	port        string
+	ipInfoToken string
+	myCIDR      string
+
+	readHeaderTimeout time.Duration
+	readTimeout       time.Duration
+	writeTimeout      time.Duration
+	idleTimeout       time.Duration
+	shutdownTimeout   time.Duration
+	logTimeout        time.Duration
+}
 
 func main() {
 	setupLogger()
@@ -21,7 +39,6 @@ func main() {
 	}
 
 	server := newHTTPServer(cfg)
-
 	serverErrors := make(chan error, 1)
 	go func() {
 		slog.Info("starting http server", "addr", server.Addr)
@@ -55,10 +72,37 @@ func main() {
 }
 
 func setupLogger() {
-	handlerOptions := &slog.HandlerOptions{Level: slog.LevelInfo}
-	stdoutHandler := slog.NewJSONHandler(os.Stdout, handlerOptions)
-	stderrHandler := slog.NewJSONHandler(os.Stderr, handlerOptions)
-	slog.SetDefault(slog.New(newLevelSplitHandler(stdoutHandler, stderrHandler, slog.LevelError)))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
+}
+
+func loadConfig() (config, error) {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	if err := validatePort(port); err != nil {
+		return config{}, err
+	}
+
+	return config{
+		port:              port,
+		ipInfoToken:       os.Getenv("IP_INFO_TOKEN"),
+		myCIDR:            os.Getenv("MY_CIDR"),
+		readHeaderTimeout: 5 * time.Second,
+		readTimeout:       15 * time.Second,
+		writeTimeout:      30 * time.Second,
+		idleTimeout:       60 * time.Second,
+		shutdownTimeout:   10 * time.Second,
+		logTimeout:        3 * time.Second,
+	}, nil
+}
+
+func validatePort(port string) error {
+	parsedPort, err := strconv.Atoi(port)
+	if err != nil || parsedPort < 1 || parsedPort > 65535 {
+		return fmt.Errorf("invalid PORT %q: must be an integer from 1 to 65535", port)
+	}
+	return nil
 }
 
 func newHTTPServer(cfg config) *http.Server {

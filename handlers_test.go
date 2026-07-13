@@ -7,12 +7,10 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
 func TestRouteContracts(t *testing.T) {
-	restore := holiday.SetNowFuncForTest(func() time.Time {
+	restore := SetNowFuncForTest(func() time.Time {
 		return time.Date(2025, 6, 10, 12, 0, 0, 0, time.FixedZone("UTC-5", -5*60*60))
 	})
 	defer restore()
@@ -29,6 +27,7 @@ func TestRouteContracts(t *testing.T) {
 			Date string `json:"date"`
 			Name string `json:"name"`
 		}
+		assertJSONNewline(t, rec)
 		decodeJSON(t, rec, &holidays)
 		if len(holidays) == 0 {
 			t.Fatal("expected holidays")
@@ -48,6 +47,7 @@ func TestRouteContracts(t *testing.T) {
 			Date string `json:"date"`
 			Name string `json:"name"`
 		}
+		assertJSONNewline(t, rec)
 		decodeJSON(t, rec, &holidays)
 		if holidays[0].Name != "Año Nuevo" || holidays[0].Date != "2027-01-01T00:00:00Z" {
 			t.Fatalf("first holiday = %+v, want Año Nuevo on 2027-01-01", holidays[0])
@@ -62,6 +62,7 @@ func TestRouteContracts(t *testing.T) {
 		assertStatus(t, rec, http.StatusOK)
 		assertCORS(t, rec)
 		assertContentType(t, rec, "application/json")
+		assertJSONNewline(t, rec)
 		var body map[string]bool
 		decodeJSON(t, rec, &body)
 		if body["isHoliday"] {
@@ -74,6 +75,7 @@ func TestRouteContracts(t *testing.T) {
 		assertStatus(t, rec, http.StatusOK)
 		assertCORS(t, rec)
 		assertContentType(t, rec, "application/json")
+		assertJSONNewline(t, rec)
 		var body map[string]bool
 		decodeJSON(t, rec, &body)
 		if !body["isHoliday"] {
@@ -85,7 +87,8 @@ func TestRouteContracts(t *testing.T) {
 		rec := performRequest(mux, http.MethodGet, "/is/bad")
 		assertStatus(t, rec, http.StatusBadRequest)
 		assertCORS(t, rec)
-		if body := strings.TrimSpace(rec.Body.String()); body != "error parsing date" {
+		assertContentType(t, rec, "")
+		if body := rec.Body.String(); body != "error parsing date" {
 			t.Fatalf("body = %q, want error parsing date", body)
 		}
 	})
@@ -94,7 +97,8 @@ func TestRouteContracts(t *testing.T) {
 		rec := performRequest(mux, http.MethodGet, "/make?year=bad")
 		assertStatus(t, rec, http.StatusBadRequest)
 		assertCORS(t, rec)
-		if body := strings.TrimSpace(rec.Body.String()); body != "error parsing year" {
+		assertContentType(t, rec, "")
+		if body := rec.Body.String(); body != "error parsing year" {
 			t.Fatalf("body = %q, want error parsing year", body)
 		}
 	})
@@ -111,6 +115,7 @@ func TestRouteContracts(t *testing.T) {
 			IsToday   bool   `json:"isToday"`
 			DaysUntil int    `json:"daysUntil"`
 		}
+		assertJSONNewline(t, rec)
 		decodeJSON(t, rec, &body)
 		if body.Name != "Corpus Christi" || body.Date != "2025-06-23T00:00:00Z" || body.IsToday || body.DaysUntil != 13 {
 			t.Fatalf("/next body = %+v, want Corpus Christi in 13 days", body)
@@ -123,8 +128,10 @@ func TestRouteContracts(t *testing.T) {
 		assertCORS(t, rec)
 		assertContentType(t, rec, "text/html")
 		body := rec.Body.String()
-		if !strings.Contains(body, "NO :(") || !strings.Contains(body, "Corpus Christi") {
-			t.Fatalf("/template body missing expected current/next holiday text: %q", body)
+		for _, content := range []string{"¿Es Hoy Festivo en Colombia?", "NO :(", "Faltan", "13", "Días", "Lunes", "23", "Junio", "2025", "Celebraremos Corpus Christi"} {
+			if !strings.Contains(body, content) {
+				t.Fatalf("/template body missing %q: %q", content, body)
+			}
 		}
 	})
 
@@ -134,8 +141,15 @@ func TestRouteContracts(t *testing.T) {
 		assertCORS(t, rec)
 		assertContentType(t, rec, "text/html")
 		body := rec.Body.String()
-		if !strings.Contains(body, "Corpus Christi") || !strings.Contains(body, "en 13 Días") {
-			t.Fatalf("/left body missing expected remaining holiday: %q", body)
+		for _, content := range []string{
+			"Corpus Christi", "en 13 Días", "el Sagrado Corazón de Jesús", "San Pedro y San Pablo",
+			"el Día de la Independencia", "la Batalla de Boyacá", "la Asunción de la Virgen",
+			"el Día de la Raza", "Todos los Santos", "la Independencia de Cartagena",
+			"la Inmaculada Concepción", "el Día de Navidad",
+		} {
+			if !strings.Contains(body, content) {
+				t.Fatalf("/left body missing %q: %q", content, body)
+			}
 		}
 	})
 
@@ -145,14 +159,9 @@ func TestRouteContracts(t *testing.T) {
 		assertCORS(t, rec)
 		assertContentType(t, rec, "application/json")
 
-		var body struct {
-			Status      int      `json:"status"`
-			Message     string   `json:"message"`
-			ValidRoutes []string `json:"valid_routes"`
-		}
-		decodeJSON(t, rec, &body)
-		if body.Status != http.StatusBadRequest || body.Message != "Please Use Valid Routes:" || len(body.ValidRoutes) != 4 {
-			t.Fatalf("invalid-route body = %+v", body)
+		const want = `{"status":400,"message":"Please Use Valid Routes:","valid_routes":["/all","/next","/is/YYYY-MM-DD","/make?year=YYYY"]}`
+		if body := rec.Body.String(); body != want {
+			t.Fatalf("invalid-route body = %q, want %q", body, want)
 		}
 	})
 
@@ -160,8 +169,20 @@ func TestRouteContracts(t *testing.T) {
 		rec := performRequest(mux, http.MethodGet, "/healthz")
 		assertStatus(t, rec, http.StatusOK)
 		assertCORS(t, rec)
-		if body := strings.TrimSpace(rec.Body.String()); body != "ok" {
+		assertContentType(t, rec, "text/plain; charset=utf-8")
+		if body := rec.Body.String(); body != "ok" {
 			t.Fatalf("body = %q, want ok", body)
+		}
+	})
+
+	t.Run("unsupported method", func(t *testing.T) {
+		rec := performRequest(mux, http.MethodPost, "/all")
+		assertStatus(t, rec, http.StatusBadRequest)
+		assertCORS(t, rec)
+		assertContentType(t, rec, "application/json")
+		const want = `{"status":400,"message":"Please Use Valid Routes:","valid_routes":["/all","/next","/is/YYYY-MM-DD","/make?year=YYYY"]}`
+		if body := rec.Body.String(); body != want {
+			t.Fatalf("unsupported-method body = %q, want %q", body, want)
 		}
 	})
 }
@@ -191,6 +212,13 @@ func assertContentType(t *testing.T, rec *httptest.ResponseRecorder, want string
 	t.Helper()
 	if got := rec.Header().Get("Content-Type"); got != want {
 		t.Fatalf("Content-Type = %q, want %q", got, want)
+	}
+}
+
+func assertJSONNewline(t *testing.T, rec *httptest.ResponseRecorder) {
+	t.Helper()
+	if !strings.HasSuffix(rec.Body.String(), "\n") {
+		t.Fatalf("JSON response must end with a newline: %q", rec.Body.String())
 	}
 }
 

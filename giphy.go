@@ -1,4 +1,4 @@
-package giphy
+package main
 
 import (
 	"context"
@@ -12,32 +12,30 @@ import (
 	"time"
 )
 
-const maxResponseBytes = 1 << 20
+const maxGiphyResponseBytes = 1 << 20
 
 var (
-	ErrMissingAPIKey = errors.New("missing GIPHY_KEY")
-	gifHTTPClient    = &http.Client{Timeout: 3 * time.Second}
+	errMissingGiphyKey = errors.New("missing GIPHY_KEY")
+	gifHTTPClient      = &http.Client{Timeout: 3 * time.Second}
 )
 
-func FetchGifURL() *string {
-	gifURL, err := FetchGifURLContext(context.Background())
-	if err != nil {
-		return nil
-	}
-	return gifURL
+type gifResponse struct {
+	Data struct {
+		Images struct {
+			Original struct {
+				URL string `json:"url"`
+			} `json:"original"`
+		} `json:"images"`
+	} `json:"data"`
 }
 
-func FetchGifURLContext(ctx context.Context) (*string, error) {
+func fetchGifURLContext(ctx context.Context) (*string, error) {
 	key := os.Getenv("GIPHY_KEY")
 	if key == "" {
-		return nil, ErrMissingAPIKey
+		return nil, errMissingGiphyKey
 	}
 
-	requestURL := url.URL{
-		Scheme: "https",
-		Host:   "api.giphy.com",
-		Path:   "/v1/gifs/random",
-	}
+	requestURL := url.URL{Scheme: "https", Host: "api.giphy.com", Path: "/v1/gifs/random"}
 	query := requestURL.Query()
 	query.Set("api_key", key)
 	query.Set("tag", "celebrate")
@@ -59,8 +57,8 @@ func FetchGifURLContext(ctx context.Context) (*string, error) {
 		return nil, fmt.Errorf("giphy returned status %d", res.StatusCode)
 	}
 
-	var gif Gif
-	if err := json.NewDecoder(io.LimitReader(res.Body, maxResponseBytes)).Decode(&gif); err != nil {
+	var gif gifResponse
+	if err := json.NewDecoder(io.LimitReader(res.Body, maxGiphyResponseBytes)).Decode(&gif); err != nil {
 		return nil, err
 	}
 
@@ -68,6 +66,5 @@ func FetchGifURLContext(ctx context.Context) (*string, error) {
 	if gifURL == "" {
 		return nil, errors.New("giphy response missing original image url")
 	}
-
 	return new(gifURL), nil
 }
