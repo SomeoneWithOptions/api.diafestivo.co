@@ -5,18 +5,16 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
 func handleAll(w http.ResponseWriter, _ *http.Request) {
-	now := holiday.NowInCOT()
-	holidays := holiday.MakeHolidaysByYear(now.Year())
+	now := NowInCOT()
+	holidays := MakeHolidaysByYear(now.Year())
 	writeJSON(w, http.StatusOK, holidays)
 }
 
 func handleNext(w http.ResponseWriter, _ *http.Request) {
-	nextHoliday := holiday.FindUpcomingHoliday()
+	nextHoliday := FindUpcomingHoliday()
 	writeJSON(w, http.StatusOK, nextHoliday)
 }
 
@@ -29,10 +27,10 @@ func handleIs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]bool{"isHoliday": false}
-	holidays := holiday.MakeHolidaysByYear(parsedDate.Year())
-	for _, holidayItem := range *holidays {
-		holidayDate := holiday.HolidayDateInCOT(holidayItem)
-		if holiday.IsSameDate(parsedDate, holidayDate) {
+	holidays := MakeHolidaysByYear(parsedDate.Year())
+	for _, holidayItem := range holidays {
+		holidayDate := HolidayDateInCOT(holidayItem)
+		if IsSameDate(parsedDate, holidayDate) {
 			response["isHoliday"] = true
 			break
 		}
@@ -49,7 +47,7 @@ func handleMake(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	holidays := holiday.MakeHolidaysByYear(year)
+	holidays := MakeHolidaysByYear(year)
 	writeJSON(w, http.StatusOK, holidays)
 }
 

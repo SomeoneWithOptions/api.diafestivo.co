@@ -1,4 +1,4 @@
-package holiday
+package main
 
 import (
 	"testing"
@@ -56,11 +56,11 @@ func TestMakeHolidaysByYearKnownDates(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			holidays := MakeHolidaysByYear(tt.year)
-			if len(*holidays) != tt.wantCount {
-				t.Fatalf("holiday count = %d, want %d", len(*holidays), tt.wantCount)
+			if len(holidays) != tt.wantCount {
+				t.Fatalf("holiday count = %d, want %d", len(holidays), tt.wantCount)
 			}
 			byName := map[string]string{}
-			for _, holiday := range *holidays {
+			for _, holiday := range holidays {
 				byName[holiday.Name] = HolidayDateInCOT(holiday).Format(time.DateOnly)
 			}
 
@@ -80,17 +80,6 @@ func TestMakeHolidaysByYearKnownDates(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestMakeHolidaysByYearReturnsClone(t *testing.T) {
-	holidayList := MakeHolidaysByYear(2027)
-	originalName := (*holidayList)[0].Name
-	(*holidayList)[0].Name = "corrupted"
-
-	freshHolidayList := MakeHolidaysByYear(2027)
-	if got := (*freshHolidayList)[0].Name; got != originalName {
-		t.Fatalf("cache was mutated: got %q, want %q", got, originalName)
 	}
 }
 
@@ -117,7 +106,7 @@ func TestClockDependentHolidayMethods(t *testing.T) {
 	}
 
 	remainingHolidays := holidays.GetRemaining()
-	if len(*remainingHolidays) == 0 || (*remainingHolidays)[0].Name != "Corpus Christi" {
+	if len(remainingHolidays) == 0 || remainingHolidays[0].Name != "Corpus Christi" {
 		t.Fatalf("first remaining holiday = %#v, want Corpus Christi", remainingHolidays)
 	}
 }
@@ -129,10 +118,10 @@ func TestGetRemainingExcludesToday(t *testing.T) {
 
 	holidays := MakeHolidaysByYear(2025)
 	remainingHolidays := holidays.GetRemaining()
-	if len(*remainingHolidays) == 0 {
+	if len(remainingHolidays) == 0 {
 		t.Fatal("expected remaining holidays")
 	}
-	if got := (*remainingHolidays)[0].Name; got == "Corpus Christi" {
+	if got := remainingHolidays[0].Name; got == "Corpus Christi" {
 		t.Fatalf("today's holiday should be excluded from /left semantics, got %q", got)
 	}
 }

@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 	"github.com/SomeoneWithOptions/api.diafestivo.co/templateinfo"
 )
 
 func handleTemplate(w http.ResponseWriter, r *http.Request) {
 	var gifURL *string
-	nextHoliday := holiday.FindUpcomingHoliday()
+	nextHoliday := FindUpcomingHoliday()
 
 	if nextHoliday.IsToday {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
@@ -25,7 +24,7 @@ func handleTemplate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	holidayDate := holiday.HolidayDateInCOT(holiday.Holiday{Date: nextHoliday.Date})
+	holidayDate := HolidayDateInCOT(Holiday{Date: nextHoliday.Date})
 	templateInfo := templateinfo.NewTemplateInfo(
 		nextHoliday.Name,
 		nextHoliday.IsToday,
@@ -50,26 +49,21 @@ func handleLeft(w http.ResponseWriter, _ *http.Request) {
 		Month    string
 	}
 
-	now := holiday.NowInCOT()
+	now := NowInCOT()
 	year := now.Year()
-	holidays := holiday.MakeHolidaysByYear(year)
-	remainingHolidays := holidays.GetRemaining()
+	holidayList := MakeHolidaysByYear(year)
+	remainingHolidays := holidayList.GetRemaining()
 
 	const minDaysToShow = 3
-	if len(*remainingHolidays) < minDaysToShow {
-		nextYearHolidays := holiday.MakeHolidaysByYear(year + 1)
-		neededHolidays := minDaysToShow - len(*remainingHolidays)
-		for i, holidayItem := range *nextYearHolidays {
-			if i == neededHolidays {
-				break
-			}
-			*remainingHolidays = append(*remainingHolidays, holidayItem)
-		}
+	if len(remainingHolidays) < minDaysToShow {
+		nextYearHolidays := MakeHolidaysByYear(year + 1)
+		neededHolidays := minDaysToShow - len(remainingHolidays)
+		remainingHolidays = append(remainingHolidays, nextYearHolidays[:neededHolidays]...)
 	}
 
-	templateData := make([]leftHolidayView, 0, len(*remainingHolidays))
-	for _, holidayItem := range *remainingHolidays {
-		holidayDate := holiday.HolidayDateInCOT(holidayItem)
+	templateData := make([]leftHolidayView, 0, len(remainingHolidays))
+	for _, holidayItem := range remainingHolidays {
+		holidayDate := HolidayDateInCOT(holidayItem)
 		templateData = append(templateData, leftHolidayView{
 			Name:     holidayItem.Name,
 			Day:      holidayDate.Day(),

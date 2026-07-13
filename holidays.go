@@ -1,117 +1,95 @@
-package holiday
+package main
 
 import (
 	"math"
 	"slices"
-	"sync"
 	"time"
 )
 
-// Package-level timezone avoids recreating it on every call.
-var cotLocation = time.FixedZone("UTC-5", -5*60*60)
+var (
+	cotLocation = time.FixedZone("UTC-5", -5*60*60)
+	nowFunc     = time.Now
+)
 
-// nowFunc is a test seam. Production uses time.Now.
-var nowFunc = time.Now
-
-// Cache computed holidays per year. Holidays are deterministic
-// for a given year, so this never needs invalidation.
-var holidayCache sync.Map
-
-func (h Holidays) Sort() {
-	slices.SortStableFunc(h, func(a, b Holiday) int {
-		return a.Date.Compare(b.Date)
-	})
+type NextHoliday struct {
+	Name      string    `json:"name"`
+	Date      time.Time `json:"date"`
+	IsToday   bool      `json:"isToday"`
+	DaysUntil int       `json:"daysUntil"`
 }
 
-func (h *Holidays) FindNext() *Holiday {
+type Holiday struct {
+	Date time.Time `json:"date"`
+	Name string    `json:"name"`
+}
+
+type Holidays []Holiday
+
+func (h Holidays) Sort() {
+	slices.SortStableFunc(h, func(a, b Holiday) int { return a.Date.Compare(b.Date) })
+}
+
+func (h Holidays) FindNext() *Holiday {
 	now := NowInCOT()
-	for _, holiday := range *h {
-		holidayDate := HolidayDateInCOT(holiday)
-		if IsSameDate(now, holidayDate) {
-			return &holiday
-		}
-		if holidayDate.After(now) {
-			return &holiday
+	for i := range h {
+		holidayDate := HolidayDateInCOT(h[i])
+		if IsSameDate(now, holidayDate) || holidayDate.After(now) {
+			return &h[i]
 		}
 	}
 	return nil
 }
 
-func (h *Holidays) GetRemaining() *Holidays {
-	remainingHolidays := Holidays{}
+func (h Holidays) GetRemaining() Holidays {
+	var remaining Holidays
 	now := NowInCOT()
-
-	for _, holiday := range *h {
-		holidayDate := HolidayDateInCOT(holiday)
-		if holidayDate.After(now) {
-			remainingHolidays = append(remainingHolidays, holiday)
+	for _, holiday := range h {
+		if HolidayDateInCOT(holiday).After(now) {
+			remaining = append(remaining, holiday)
 		}
 	}
-	return &remainingHolidays
+	return remaining
 }
 
 func (h Holiday) IsToday() bool {
-	now := NowInCOT()
-	holidayDate := HolidayDateInCOT(h)
-	return IsSameDate(now, holidayDate)
+	return IsSameDate(NowInCOT(), HolidayDateInCOT(h))
 }
 
 func (h Holiday) DaysUntil() int {
-	now := NowInCOT()
-	holidayDate := HolidayDateInCOT(h)
-	daysUntil := math.Ceil(holidayDate.Sub(now).Hours() / 24)
-	return int(daysUntil)
+	return int(math.Ceil(HolidayDateInCOT(h).Sub(NowInCOT()).Hours() / 24))
 }
 
-// SetNowFuncForTest replaces the package clock and returns a restore function.
-// It is intended for tests.
 func SetNowFuncForTest(fn func() time.Time) func() {
-	previousNowFunc := nowFunc
+	previous := nowFunc
 	if fn == nil {
 		nowFunc = time.Now
 	} else {
 		nowFunc = fn
 	}
-	return func() { nowFunc = previousNowFunc }
+	return func() { nowFunc = previous }
 }
 
-// NowInCOT returns the current time in Colombia timezone.
 func NowInCOT() time.Time {
 	return nowFunc().In(cotLocation)
 }
 
-// HolidayDateInCOT returns a holiday's civil date at midnight in Colombia timezone.
 func HolidayDateInCOT(h Holiday) time.Time {
 	return time.Date(h.Date.Year(), h.Date.Month(), h.Date.Day(), 0, 0, 0, 0, cotLocation)
 }
 
-// MakeDatesInCOT returns (currentTime, holidayDate) in COT.
-// Kept for backward compatibility.
-func MakeDatesInCOT(h Holiday) (time.Time, time.Time) {
-	return NowInCOT(), HolidayDateInCOT(h)
+func IsSameDate(a, b time.Time) bool {
+	return a.Year() == b.Year() && a.Month() == b.Month() && a.Day() == b.Day()
 }
 
-func IsSameDate(d1, d2 time.Time) bool {
-	return d1.Year() == d2.Year() && d1.Month() == d2.Month() && d1.Day() == d2.Day()
-}
-
-func FindUpcomingHoliday() *NextHoliday {
+func FindUpcomingHoliday() NextHoliday {
 	now := NowInCOT()
 	holidays := MakeHolidaysByYear(now.Year())
-	nextHoliday := holidays.FindNext()
-
-	if nextHoliday == nil {
+	next := holidays.FindNext()
+	if next == nil {
 		holidays = MakeHolidaysByYear(now.Year() + 1)
-		nextHoliday = holidays.FindNext()
+		next = holidays.FindNext()
 	}
-
-	result := NewNextHoliday(
-		nextHoliday.Name,
-		nextHoliday.Date,
-		nextHoliday.IsToday(),
-		nextHoliday.DaysUntil(),
-	)
-	return &result
+	return NextHoliday{Name: next.Name, Date: next.Date, IsToday: next.IsToday(), DaysUntil: next.DaysUntil()}
 }
 
 func ComputeEaster(year int) time.Time {
@@ -132,21 +110,14 @@ func ComputeEaster(year int) time.Time {
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
-func MoveToMonday(t time.Time) time.Time {
-	if t.Weekday() != time.Monday {
-		days := (8 - int(t.Weekday())) % 7
-		t = t.AddDate(0, 0, days)
+func MoveToMonday(date time.Time) time.Time {
+	if date.Weekday() != time.Monday {
+		date = date.AddDate(0, 0, (8-int(date.Weekday()))%7)
 	}
-	return t
+	return date
 }
 
-func MakeHolidaysByYear(year int) *Holidays {
-	if cached, ok := holidayCache.Load(year); ok {
-		cachedHolidays := cached.(Holidays)
-		clonedHolidays := slices.Clone(cachedHolidays)
-		return &clonedHolidays
-	}
-
+func MakeHolidaysByYear(year int) Holidays {
 	easter := ComputeEaster(year)
 	holidays := Holidays{
 		{Date: time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), Name: "Año Nuevo"},
@@ -168,16 +139,12 @@ func MakeHolidaysByYear(year int) *Holidays {
 		{Date: time.Date(year, 12, 8, 0, 0, 0, 0, time.UTC), Name: "la Inmaculada Concepción"},
 		{Date: time.Date(year, 12, 25, 0, 0, 0, 0, time.UTC), Name: "el Día de Navidad"},
 	}
-
 	if year >= 2026 {
 		holidays = append(holidays, Holiday{
 			Date: MoveToMonday(time.Date(year, 7, 9, 0, 0, 0, 0, time.UTC)),
 			Name: "el Día de Nuestra Señora del Rosario de Chiquinquirá",
 		})
 	}
-
 	holidays.Sort()
-	canonicalHolidays := slices.Clone(holidays)
-	holidayCache.Store(year, canonicalHolidays)
-	return &holidays
+	return holidays
 }

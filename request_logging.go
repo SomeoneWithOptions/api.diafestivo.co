@@ -10,8 +10,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
 type requestLogData struct {
@@ -63,7 +61,7 @@ func loggingMiddleware(next http.Handler, cfg config) http.Handler {
 			requestIP:  requestIP(r),
 			status:     status,
 			duration:   time.Since(started),
-			loggedTime: holiday.NowInCOT(),
+			loggedTime: NowInCOT(),
 		}
 
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), cfg.logTimeout)

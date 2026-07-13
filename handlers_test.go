@@ -7,12 +7,10 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/SomeoneWithOptions/api.diafestivo.co/holiday"
 )
 
 func TestRouteContracts(t *testing.T) {
-	restore := holiday.SetNowFuncForTest(func() time.Time {
+	restore := SetNowFuncForTest(func() time.Time {
 		return time.Date(2025, 6, 10, 12, 0, 0, 0, time.FixedZone("UTC-5", -5*60*60))
 	})
 	defer restore()
