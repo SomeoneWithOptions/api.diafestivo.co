@@ -95,6 +95,11 @@ func requestIP(r *http.Request) string {
 }
 
 func logRequest(ctx context.Context, data requestLogData, cfg config) {
+	if data.status < http.StatusOK || data.status >= http.StatusMultipleChoices {
+		logLocalRequest(data, "non_success_status")
+		return
+	}
+
 	requestAddr, err := netip.ParseAddr(data.requestIP)
 	if err != nil {
 		logLocalRequest(data, "invalid_or_missing_ip")
