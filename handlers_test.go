@@ -153,6 +153,31 @@ func TestRouteContracts(t *testing.T) {
 		}
 	})
 
+	t.Run("GET /left pads to min 5 from next year", func(t *testing.T) {
+		restoreYearEnd := SetNowFuncForTest(func() time.Time {
+			return time.Date(2025, 12, 10, 12, 0, 0, 0, time.FixedZone("UTC-5", -5*60*60))
+		})
+		defer restoreYearEnd()
+
+		rec := performRequest(mux, http.MethodGet, "/left")
+		assertStatus(t, rec, http.StatusOK)
+		body := rec.Body.String()
+		if got := strings.Count(body, `<li class="holiday">`); got != 5 {
+			t.Fatalf("/left item count = %d, want 5; body=%q", got, body)
+		}
+		for _, content := range []string{
+			"el Día de Navidad",
+			"Año Nuevo",
+			"el Día de los Reyes Magos",
+			"el Día de San José",
+			"Jueves Santo",
+		} {
+			if !strings.Contains(body, content) {
+				t.Fatalf("/left body missing %q: %q", content, body)
+			}
+		}
+	})
+
 	t.Run("invalid route", func(t *testing.T) {
 		rec := performRequest(mux, http.MethodGet, "/not-a-route")
 		assertStatus(t, rec, http.StatusBadRequest)

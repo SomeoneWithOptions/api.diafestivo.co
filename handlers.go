@@ -128,7 +128,7 @@ func handleLeft(w http.ResponseWriter, _ *http.Request) {
 
 	year := NowInCOT().Year()
 	remaining := MakeHolidaysByYear(year).GetRemaining()
-	const minDaysToShow = 3
+	const minDaysToShow = 5
 	if len(remaining) < minDaysToShow {
 		nextYear := MakeHolidaysByYear(year + 1)
 		remaining = append(remaining, nextYear[:minDaysToShow-len(remaining)]...)
